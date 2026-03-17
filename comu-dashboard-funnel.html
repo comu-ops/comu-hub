@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMU TAP Conversion Funnel Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light mode */
+            --primary: #DE2165;
+            --primary-dark: #1D2035;
+            --primary-light: #F5E6F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --neutral-bg: #F9FAFB;
+            --neutral-border: #E5E7EB;
+            --neutral-text: #1F2937;
+            --neutral-text-secondary: #6B7280;
+            --neutral-text-muted: #9CA3AF;
+
+            /* Dark mode */
+            --dark-bg: #0F172A;
+            --dark-bg-secondary: #1E293B;
+            --dark-border: #334155;
+            --dark-text: #F1F5F9;
+            --dark-text-secondary: #CBD5E1;
+            --dark-text-muted: #94A3B8;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--neutral-bg);
+            color: var(--neutral-text);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #A01852 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        body.dark-mode header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #0F172A 100%);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .clock {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+            min-width: 180px;
+            text-align: right;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-dark-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-dark-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 40px 0 20px 0;
+            color: var(--neutral-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        body.dark-mode .section-title {
+            color: var(--dark-text);
+        }
+
+        /* Funnel Section */
+        .funnel-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark-mode .funnel-section {
+            background: var(--dark-bg-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .funnel-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 8px;
+            min-height: 300px;
+            margin: 40px 0;
+        }
+
+        .funnel-stage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .funnel-bar {
+            width: 100%;
+            background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 100%);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .funnel-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        .funnel-stage:nth-child(1) .funnel-bar {
+            height: 240px;
+            background: linear-gradient(180deg, #FFE5F0 0%, var(--primary) 100%);
+        }
+
+        .funnel-stage:nth-child(2) .funnel-bar {
+            height: 200px;
+            background: linear-gradient(180deg, #FFD4E8 0%, #D91F60 100%);
+        }
+
+        .funnel-stage:nth-child(3) .funnel-bar {
+            height: 150px;
+            background: linear-gradient(180deg, #FFC3E0 0%, #BE1A54 100%);
+        }
+
+        .funnel-stage:nth-child(4) .funnel-bar {
+            height: 90px;
+            background: linear-gradient(180deg, #FFB2D9 0%, #AA1849 100%);
+        }
+
+        .funnel-stage:nth-child(5) .funnel-bar {
+            height: 55px;
+            background: linear-gradient(180deg, #FFA1D2 0%, #8B0F3D 100%);
+        }
+
+        .funnel-bar:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 8px 16px rgba(222, 33, 101, 0.3);
+        }
+
+        .funnel-label {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--neutral-text-secondary);
+            max-width: 120px;
+        }
+
+        body.dark-mode .funnel-label {
+            color: var(--dark-text-secondary);
+        }
+
+        .funnel-details {
+            display: none;
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(222, 33, 101, 0.3);
+        }
+
+        .funnel-stage:hover .funnel-details {
+            display: block;
+        }
+
+        .funnel-arrow {
+            position: absolute;
+            bottom: 60px;
+            font-size: 24px;
+            color: var(--neutral-text-muted);
+        }
+
+        body.dark-mode .funnel-arrow {
+            color: var(--dark-text-muted);
+        }
+
+        /* Alert Cards */
+        .alert-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .alert-card {
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .alert-card {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        body.dark-mode .alert-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .alert-danger {
+            background: #FEF2F2;
+            border-color: var(--danger);
+            color: #7F1D1D;
+        }
+
+        body.dark-mode .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #FCA5A5;
+        }
+
+        .alert-warning {
+            background: #FFFBEB;
+            border-color: var(--warning);
+            color: #78350F;
+        }
+
+        body.dark-mode .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #FCDAA5;
+        }
+
+        .alert-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .alert-description {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            opacity: 0.85;
+        }
+
+        .alert-action {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            background: currentColor;
+            color: white;
+            border-radius: 4px;
+            display: inline-block;
+            opacity: 0.2;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        body.dark-mode .table-container {
+            background: var(--dark-bg-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            border: 1px solid var(--neutral-border);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        body.dark-mode .search-input {
+            background: var(--dark-bg);
+            border-color: var(--dark-border);
+            color: var(--dark-text);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--neutral-bg);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--neutral-text-secondary);
+            border-bottom: 2px solid var(--neutral-border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        body.dark-mode th {
+            background: var(--dark-bg);
+            color: var(--dark-text-secondary);
+            border-bottom-color: var(--dark-border);
+        }
+
+        th:hover {
+            background: var(--primary-light);
+        }
+
+        body.dark-mode th:hover {
+            background: rgba(222, 33, 101, 0.1);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--neutral-border);
+            font-size: 14px;
+        }
+
+        body.dark-mode td {
+            border-bottom-color: var(--dark-border);
+        }
+
+        tr:hover {
+            background: var(--neutral-bg);
+        }
+
+        body.dark-mode tr:hover {
+            background: rgba(222, 33, 101, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .status-converted {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        body.dark-mode .status-converted {
+            background: rgba(16, 185, 129, 0.2);
+            color: #A7F3D0;
+        }
+
+        .status-sent {
+            background: #DBEAFE;
+            color: #0C4A6E;
+        }
+
+        body.dark-mode .status-sent {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+        }
+
+        .status-not-converted {
+            background: #FEE2E2;
+            color: #7F1D1D;
+        }
+
+        body.dark-mode .status-not-converted {
+            background: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+        }
+
+        .status-awaiting {
+            background: #FEF3C7;
+            color: #78350F;
+        }
+
+        body.dark-mode .status-awaiting {
+            background: rgba(245, 158, 11, 0.2);
+            color: #FCDAA5;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark-mode .chart-card {
+            background: var(--dark-bg-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--neutral-text);
+        }
+
+        body.dark-mode .chart-title {
+            color: var(--dark-text);
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Reacher Card */
+        .reacher-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        body.dark-mode .reacher-card {
+            background: var(--dark-bg-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .reacher-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            background: var(--neutral-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        body.dark-mode .stat-box {
+            background: var(--dark-bg);
+            border-left-color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--neutral-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        body.dark-mode .stat-label {
+            color: var(--dark-text-secondary);
+        }
+
+        .reacher-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .funnel-container {
+                min-height: 200px;
+                gap: 4px;
+            }
+
+            .funnel-bar {
+                font-size: 12px;
+            }
+
+            .funnel-stage:nth-child(1) .funnel-bar {
+                height: 160px;
+            }
+
+            .funnel-stage:nth-child(2) .funnel-bar {
+                height: 130px;
+            }
+
+            .funnel-stage:nth-child(3) .funnel-bar {
+                height: 100px;
+            }
+
+            .funnel-stage:nth-child(4) .funnel-bar {
+                height: 60px;
+            }
+
+            .funnel-stage:nth-child(5) .funnel-bar {
+                height: 40px;
+            }
+
+            .funnel-label {
+                font-size: 11px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-left,
+            .header-controls {
+                width: 100%;
+            }
+
+            .clock {
+                width: 100%;
+                text-align: left;
+                margin-top: 10px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            td, th {
+                padding: 8px;
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--neutral-text-secondary);
+            font-size: 12px;
+            border-top: 1px solid var(--neutral-border);
+            margin-top: 40px;
+        }
+
+        body.dark-mode footer {
+            color: var(--dark-text-secondary);
+            border-top-color: var(--dark-border);
+        }
+
+        /* Loading and animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-card, .alert-card, .table-container, .reacher-card {
+            animation: fadeIn 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="logo">🎯 COMU</div>
+            <div class="header-title">TAP Conversion Funnel</div>
+        </div>
+        <div class="header-controls">
+            <div class="clock" id="clock"></div>
+            <div class="btn-group">
+                <button class="btn-icon btn-dark-toggle" id="darkModeToggle" title="Toggle dark mode">🌓</button>
+                <button class="btn-icon btn-back" id="backBtn" title="Go back to home">← Voltar</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Section 1: Funnel Visualization -->
+        <section class="funnel-section">
+            <h2 class="section-title">📊 Funil de Conversão TAP</h2>
+            <div class="funnel-container">
+                <div class="funnel-stage">
+                    <div class="funnel-bar">
+                        <span>4,086</span>
+                        <div class="funnel-details">4,086 criadores</div>
+                    </div>
+                    <div class="funnel-label">Creators no CAP</div>
+                </div>
+
+                <div class="funnel-stage">
+                    <div style="color: var(--neutral-text-muted); font-size: 28px; margin-bottom: 20px;">⬇ 5%</div>
+                    <div class="funnel-bar">
+                        <span>200</span>
+                        <div class="funnel-details">200 coletados</div>
+                    </div>
+                    <div class="funnel-label">Coletados (JERÔNIMO)</div>
+                </div>
+
+                <div class="funnel-stage">
+                    <div style="color: var(--neutral-text-muted); font-size: 28px; margin-bottom: 20px;">⬇ 75%</div>
+                    <div class="funnel-bar">
+                        <span>150</span>
+                        <div class="funnel-details">150 mensagens</div>
+                    </div>
+                    <div class="funnel-label">Mensagem Enviada (TIAGO)</div>
+                </div>
+
+                <div class="funnel-stage">
+                    <div style="color: var(--neutral-text-muted); font-size: 28px; margin-bottom: 20px;">⬇ 10%</div>
+                    <div class="funnel-bar">
+                        <span>15</span>
+                        <div class="funnel-details">15 convertidos</div>
+                    </div>
+                    <div class="funnel-label">Convertidos TAP</div>
+                </div>
+
+                <div class="funnel-stage">
+                    <div style="color: var(--neutral-text-muted); font-size: 28px; margin-bottom: 20px;">⬇ 60%</div>
+                    <div class="funnel-bar">
+                        <span>906</span>
+                        <div class="funnel-details">906 com receita</div>
+                    </div>
+                    <div class="funnel-label">Gerando Receita COMU</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Alert Cards -->
+        <h2 class="section-title">⚠️ Alertas & Oportunidades</h2>
+        <div class="alert-cards">
+            <div class="alert-card alert-danger">
+                <div class="alert-title">150 Criadores Esperando</div>
+                <div class="alert-description">
+                    150 criadores foram coletados pelo JERÔNIMO mas ainda não receberam mensagem do TIAGO
+                </div>
+                <div class="alert-action">Próximo: TIAGO</div>
+            </div>
+
+            <div class="alert-card alert-danger">
+                <div class="alert-title">29 Não Convertidos</div>
+                <div class="alert-description">
+                    29 criadores receberam mensagem há mais de 3 dias sem converter. Oportunidade perdida de R$ 93.960/mês
+                </div>
+                <div class="alert-action">Follow-up: AMs</div>
+            </div>
+
+            <div class="alert-card alert-warning">
+                <div class="alert-title">1.194 Inativos</div>
+                <div class="alert-description">
+                    1.194 criadores com GMV zero. Oportunidade de ativação e campanha de engajamento
+                </div>
+                <div class="alert-action">Ativação</div>
+            </div>
+        </div>
+
+        <!-- Section 3: Brand Pipeline Table -->
+        <h2 class="section-title">📈 Pipeline por Brand (READY)</h2>
+        <div class="table-container">
+            <div class="table-controls">
+                <input type="text" class="search-input" id="brandSearch" placeholder="Buscar marca...">
+            </div>
+            <table id="brandsTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('brands', 0)">Brand ▼</th>
+                        <th onclick="sortTable('brands', 1)">Account Manager</th>
+                        <th onclick="sortTable('brands', 2)">Coletados</th>
+                        <th onclick="sortTable('brands', 3)">Mensagens Enviadas</th>
+                        <th onclick="sortTable('brands', 4)">Convertidos</th>
+                        <th onclick="sortTable('brands', 5)">Não Convertidos</th>
+                        <th onclick="sortTable('brands', 6)">Aguardando Resposta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Dot</strong></td>
+                        <td>Mirela</td>
+                        <td><strong>10</strong></td>
+                        <td><strong>5</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">0</span></td>
+                        <td><span class="status-badge status-awaiting">5</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Renova Be</strong></td>
+                        <td>Carol Goulart</td>
+                        <td><strong>36</strong></td>
+                        <td><strong>32</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">29</span></td>
+                        <td><span class="status-badge status-awaiting">3</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Magic Muuh</strong></td>
+                        <td>Mirela</td>
+                        <td><strong>10</strong></td>
+                        <td><strong>10</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">0</span></td>
+                        <td><span class="status-badge status-awaiting">10</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Zaya Beauty</strong></td>
+                        <td>Carol Goulart</td>
+                        <td><strong>8</strong></td>
+                        <td><strong>6</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">0</span></td>
+                        <td><span class="status-badge status-awaiting">6</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nanovit</strong></td>
+                        <td>Victória</td>
+                        <td><strong>12</strong></td>
+                        <td><strong>8</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">0</span></td>
+                        <td><span class="status-badge status-awaiting">8</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Noma Beauty</strong></td>
+                        <td>Victória</td>
+                        <td><strong>5</strong></td>
+                        <td><strong>3</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">0</span></td>
+                        <td><span class="status-badge status-awaiting">3</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Zalia</strong></td>
+                        <td>Fabi</td>
+                        <td><strong>4</strong></td>
+                        <td><strong>2</strong></td>
+                        <td><span class="status-badge status-converted">0</span></td>
+                        <td><span class="status-badge status-not-converted">0</span></td>
+                        <td><span class="status-badge status-awaiting">2</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 4: Charts -->
+        <h2 class="section-title">📊 Análises</h2>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">Taxa de Conversão por Brand</div>
+                <div class="chart-canvas">
+                    <canvas id="conversionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Distribuição de Status dos Criadores</div>
+                <div class="chart-canvas">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Reacher Pipeline -->
+        <h2 class="section-title">🔍 Pipeline Reacher (VALDIR)</h2>
+        <div class="reacher-card">
+            <div class="reacher-stats">
+                <div class="stat-box">
+                    <div class="stat-number">115</div>
+                    <div class="stat-label">Criadores Encontrados</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Mensagens Enviadas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">103</div>
+                    <div class="stat-label">Pulados</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">78</div>
+                    <div class="stat-label">Não Encontrados</div>
+                </div>
+            </div>
+
+            <div class="reacher-charts">
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Reacher (Dot)</div>
+                    <div class="chart-canvas">
+                        <canvas id="reacherChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">Motivos de Exclusão</div>
+                    <div class="chart-canvas">
+                        <canvas id="skipReasonsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Dashboard TAP Conversion Funnel v1.0 — COMU | Última atualização: <span id="footerTime"></span></p>
+    </footer>
+
+    <script>
+        // Clock and Time
+        function updateClock() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'America/Sao_Paulo'
+            };
+            const formatter = new Intl.DateTimeFormat('pt-BR', options);
+            document.getElementById('clock').textContent = formatter.format(now);
+            document.getElementById('footerTime').textContent = formatter.format(now);
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const htmlElement = document.documentElement;
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        // Back Button
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.parent.postMessage('goHome', '*');
+        });
+
+        // Table Search and Sort
+        const brandSearch = document.getElementById('brandSearch');
+        const brandsTable = document.getElementById('brandsTable');
+
+        brandSearch.addEventListener('keyup', () => {
+            const searchText = brandSearch.value.toLowerCase();
+            const rows = brandsTable.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        });
+
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const aVal = a.cells[columnIndex].textContent.trim();
+                const bVal = b.cells[columnIndex].textContent.trim();
+                const aNum = parseFloat(aVal) || aVal;
+                const bNum = parseFloat(bVal) || bVal;
+
+                if (typeof aNum === 'number' && typeof bNum === 'number') {
+                    return aNum - bNum;
+                }
+                return aVal.localeCompare(bVal);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Chart Configuration
+        const chartConfig = {
+            backgroundColor: ['rgba(222, 33, 101, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+            borderColor: ['#DE2165', '#10B981', '#3B82F6', '#F59E0B'],
+            borderWidth: 2
+        };
+
+        // Conversion Rate Chart
+        const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+        new Chart(conversionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Dot', 'Renova Be', 'Magic Muuh', 'Zaya Beauty', 'Nanovit', 'Noma Beauty', 'Zalia'],
+                datasets: [{
+                    label: 'Taxa de Conversão (%)',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(222, 33, 101, 0.7)',
+                    borderColor: '#DE2165',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+
+        // Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Convertidos', 'Mensagem Enviada', 'Não Convertidos', 'Aguardando'],
+                datasets: [{
+                    data: [15, 150, 29, 6],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(245, 158, 11, 0.7)'
+                    ],
+                    borderColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Reacher Distribution Chart
+        const reacherCtx = document.getElementById('reacherChart').getContext('2d');
+        new Chart(reacherCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Encontrados', 'Mensagens Enviadas', 'Não Encontrados', 'Já Mensageados', 'Amostra Rejeitada'],
+                datasets: [{
+                    data: [115, 12, 78, 15, 10],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Skip Reasons Chart
+        const skipCtx = document.getElementById('skipReasonsChart').getContext('2d');
+        new Chart(skipCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Não Encontrado\nno PC', 'Já Mensageado', 'Amostra\nRejeitada'],
+                datasets: [{
+                    label: 'Quantidade',
+                    data: [78, 15, 10],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: ['#EF4444', '#F59E0B', '#8B5CF6'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

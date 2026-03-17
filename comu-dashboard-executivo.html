@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMU - Dashboard Executivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <style>
+        :root {
+            --primary: #DE2165;
+            --dark: #1D2035;
+            --secondary: #2D3748;
+            --bg-light: #F7F9FB;
+            --text-dark: #1A202C;
+            --text-light: #718096;
+            --border: #E2E8F0;
+            --success: #48BB78;
+            --warning: #ED8936;
+            --danger: #F56565;
+            --info: #4299E1;
+            --amber: #D69E2E;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="dark"] {
+            --bg-light: #0F1419;
+            --text-dark: #E2E8F0;
+            --text-light: #A0AEC0;
+            --border: #2D3748;
+            --secondary: #1A202C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            transition: background-color 0.3s, color 0.3s;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .clock {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 500;
+            min-width: 200px;
+            text-align: right;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            color: var(--text-dark);
+        }
+
+        .btn-icon:hover {
+            background-color: var(--border);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--primary), #c41a52);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(222, 33, 101, 0.3);
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 32px 0 16px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid transparent;
+            background: linear-gradient(90deg, var(--primary), var(--dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] .kpi-card {
+            background: var(--secondary);
+        }
+
+        .kpi-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-4px);
+        }
+
+        .kpi-card.danger {
+            background: linear-gradient(135deg, rgba(245, 101, 101, 0.1), rgba(222, 33, 101, 0.1));
+            border: 1px solid rgba(245, 101, 101, 0.3);
+        }
+
+        [data-theme="dark"] .kpi-card.danger {
+            background: linear-gradient(135deg, rgba(245, 101, 101, 0.15), rgba(222, 33, 101, 0.15));
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .kpi-card.danger .kpi-value {
+            color: var(--danger);
+        }
+
+        .kpi-subtitle {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #c41a52);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] .chart-card {
+            background: var(--secondary);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Tables Row */
+        .tables-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .tables-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] .table-card {
+            background: var(--secondary);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--primary), #c41a52);
+            color: white;
+            padding: 16px 20px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: var(--border);
+            color: var(--text-dark);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        [data-theme="dark"] th {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(222, 33, 101, 0.03);
+        }
+
+        [data-theme="dark"] tr:hover {
+            background-color: rgba(222, 33, 101, 0.08);
+        }
+
+        .creator-handle {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.success {
+            background-color: rgba(72, 187, 120, 0.2);
+            color: var(--success);
+        }
+
+        .status-badge.warning {
+            background-color: rgba(237, 137, 54, 0.2);
+            color: var(--warning);
+        }
+
+        .status-badge.danger {
+            background-color: rgba(245, 101, 101, 0.2);
+            color: var(--danger);
+        }
+
+        .status-badge.info {
+            background-color: rgba(66, 153, 225, 0.2);
+            color: var(--info);
+        }
+
+        .agent-dept {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .agent-schedule {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .agent-emoji {
+            font-size: 18px;
+            margin-right: 4px;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] .timeline-container {
+            background: var(--secondary);
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            height: 80px;
+            background: linear-gradient(90deg, var(--border) 0%, var(--border) 100%);
+            background-size: 100% 2px;
+            background-position: 0 50%;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .timeline-bar {
+            position: absolute;
+            top: 20px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), #c41a52);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 0 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.85;
+        }
+
+        .timeline-bar:hover {
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(222, 33, 101, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-row,
+            .tables-row {
+                grid-template-columns: 1fr;
+            }
+
+            .clock {
+                text-align: left;
+                min-width: auto;
+            }
+        }
+
+        /* Number formatting utilities */
+        .currency {
+            font-weight: 700;
+        }
+
+        .number {
+            font-weight: 600;
+        }
+
+        .percentage {
+            color: var(--primary);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">COMU</div>
+                <div class="header-title">Dashboard Executivo</div>
+            </div>
+            <div class="header-controls">
+                <div class="clock" id="clock"></div>
+                <button class="btn-icon" id="themeToggle" title="Alternar tema">🌙</button>
+                <button class="btn-back" id="backBtn">← Voltar</button>
+            </div>
+        </div>
+
+        <!-- Section 1: KPI Cards -->
+        <div class="section-header">Indicadores-Chave (KPIs)</div>
+        <div class="kpi-grid">
+            <!-- GMV MCN Total -->
+            <div class="kpi-card">
+                <div class="kpi-label">GMV MCN Total</div>
+                <div class="kpi-value">R$ 95,6M</div>
+                <div class="kpi-subtitle">Afiliado R$ 51,2M + Direto R$ 44,4M | 01-15/mar</div>
+            </div>
+
+            <!-- GMV TAP -->
+            <div class="kpi-card">
+                <div class="kpi-label">GMV TAP</div>
+                <div class="kpi-value">R$ 3,1M</div>
+                <div class="kpi-subtitle">51 campanhas ativas | 44.094 pedidos</div>
+            </div>
+
+            <!-- Gap CAP→TAP (Danger) -->
+            <div class="kpi-card danger">
+                <div class="kpi-label">Gap CAP → TAP</div>
+                <div class="kpi-value">R$ 48,1M</div>
+                <div class="kpi-subtitle">93,9% do GMV afiliado sem TAP | 510 lojas sem TAP</div>
+            </div>
+
+            <!-- Receita COMU -->
+            <div class="kpi-card">
+                <div class="kpi-label">Receita COMU</div>
+                <div class="kpi-value">R$ 106,5K</div>
+                <div class="kpi-subtitle">Comissão TAP real | Est. R$ 116,2K</div>
+            </div>
+
+            <!-- Receita Potencial -->
+            <div class="kpi-card">
+                <div class="kpi-label">Receita Potencial</div>
+                <div class="kpi-value">R$ 4,8M</div>
+                <div class="kpi-subtitle">Se fechar o gap (5% do GMV MCN total)</div>
+            </div>
+
+            <!-- Creators Ativos -->
+            <div class="kpi-card">
+                <div class="kpi-label">Creators Ativos</div>
+                <div class="kpi-value">3.341 / 4.102</div>
+                <div class="kpi-subtitle">Taxa: 81,4% | 1.210 fazendo LIVE</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 81.4%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Charts -->
+        <div class="section-header">Análise Visual</div>
+        <div class="charts-row">
+            <!-- Top 5 Campanhas TAP -->
+            <div class="chart-card">
+                <div class="chart-title">Top 5 Campanhas TAP</div>
+                <div class="chart-container">
+                    <canvas id="campaignsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gap Visualization -->
+            <div class="chart-card">
+                <div class="chart-title">Distribuição de Receita: TAP vs Oportunidade</div>
+                <div class="chart-container">
+                    <canvas id="gapChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Tables -->
+        <div class="section-header">Performance e Status</div>
+        <div class="tables-row">
+            <!-- Top 10 Creators -->
+            <div class="table-card">
+                <div class="table-header">Top 10 Creators (MCN)</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Creator</th>
+                                <th>GMV</th>
+                                <th>Pedidos</th>
+                                <th>Vídeos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="creatorsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Agent Status -->
+            <div class="table-card">
+                <div class="table-header">Status dos 11 Agentes</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Agente</th>
+                                <th>Departamento</th>
+                                <th>Última Execução</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agentsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Timeline -->
+        <div class="section-header">Timeline de Execução (24h)</div>
+        <div class="timeline-container">
+            <div class="timeline-title">Quando cada agente executa durante o dia</div>
+            <div class="timeline-wrapper" id="timeline"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const creatorsData = [
+            { handle: '@felipe.tomio', gmv: 846357.70, orders: 13052, videos: 210 },
+            { handle: '@laavsri', gmv: 700086.49, orders: 13140, videos: 370 },
+            { handle: '@ericamcabeluda', gmv: 611255.55, orders: 11496, videos: 410 },
+            { handle: '@luisasoaress11', gmv: 527457.93, orders: 6265, videos: 108 },
+            { handle: '@amandaxavieer', gmv: 507689.59, orders: 7740, videos: 165 },
+            { handle: '@kevelybr', gmv: 498951.98, orders: 10520, videos: 200 },
+            { handle: '@vitrineshopbyjaque', gmv: 493222.53, orders: 6823, videos: 55 },
+            { handle: '@paulorecomendaoficial', gmv: 471610.19, orders: 6503, videos: 268 },
+            { handle: '@cozinhadanayoficial', gmv: 443972.32, orders: 7879, videos: 72 },
+            { handle: '@ape_j.c', gmv: 412577.08, orders: 5039, videos: 180 }
+        ];
+
+        const agentsData = [
+            { emoji: '✅', name: 'SEBASTIÃO', dept: 'COMU OPS', schedule: 'Diário', lastRun: '16/03 11:30', status: 'success', details: 'Coleta concluída — XLSX→JSON Mar 1-15' },
+            { emoji: '✅', name: 'JERÔNIMO', dept: 'TAP SALES', schedule: 'Diário 02:30', lastRun: '16/03 11:30', status: 'success', details: 'Resumo gerado — GMV R$3,1M TAP' },
+            { emoji: '✅', name: 'OSVALDO', dept: 'CAP OPS', schedule: 'Diário', lastRun: '16/03 08:53', status: 'success', details: 'Rotation + tracker + samples OK' },
+            { emoji: '✅', name: 'TIAGO', dept: 'TAP SALES', schedule: 'Diário 06:00', lastRun: '16/03 06:08', status: 'success', details: 'Amostras processadas' },
+            { emoji: '✅', name: 'NELSON', dept: 'GROWTH', schedule: 'SQD 08:09', lastRun: '16/03 08:09', status: 'success', details: 'Post LinkedIn publicado' },
+            { emoji: '✅', name: 'HUGO', dept: 'COMERCIAL', schedule: 'Seg+Qui', lastRun: '16/03 04:03', status: 'success', details: '470 oportunidades atualizadas' },
+            { emoji: '✅', name: 'VALDIR', dept: 'TAP SALES', schedule: 'Diário', lastRun: '16/03 09:18', status: 'success', details: 'Invites TAP enviados' },
+            { emoji: '✅', name: 'ADEMIR', dept: 'CAP OPS', schedule: 'Diário 03:00', lastRun: '16/03 08:39', status: 'success', details: 'Expiring creators monitorados' },
+            { emoji: '✅', name: 'RENATO', dept: 'CAP OPS', schedule: 'Diário 06:15', lastRun: '16/03 06:18', status: 'success', details: 'Amostras por marca aprovadas' },
+            { emoji: '🕐', name: 'JOAQUIM', dept: 'EXECUTIVO', schedule: 'Planejado', lastRun: '—', status: 'info', details: 'Executivo 360° em desenvolvimento' },
+            { emoji: '✅', name: 'CHICO', dept: 'COMU OPS', schedule: 'Terça', lastRun: '11/03', status: 'success', details: '9 AMs — próximo: 17/03' }
+        ];
+
+        const campaignsData = [
+            { name: 'COMU x BARBOURS', gmv: 943912.90, orders: 14802, creators: 2192 },
+            { name: 'COMU x GUMMY', gmv: 611781.32, orders: 6318, creators: 1105 },
+            { name: 'Creators ADEUS', gmv: 224012.80, orders: 1730, creators: 354 },
+            { name: 'COMU x GOCASE*', gmv: 119255.02, orders: 631, creators: 608 },
+            { name: 'COMU x AURA', gmv: 115426.87, orders: 1440, creators: 3598 }
+        ];
+
+        // Utility: Format currency PT-BR
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        // Utility: Format number PT-BR
+        function formatNumber(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'America/Sao_Paulo'
+            };
+            document.getElementById('clock').textContent = now.toLocaleDateString('pt-BR', options);
+        }
+
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('comu-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeButton(savedTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const button = document.getElementById('themeToggle');
+            button.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('comu-theme', newTheme);
+            updateThemeButton(newTheme);
+        }
+
+        // Back button
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.parent.postMessage('goHome', '*');
+        });
+
+        // Theme toggle button
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        // Populate creators table
+        function populateCreatorsTable() {
+            const tbody = document.getElementById('creatorsTable');
+            tbody.innerHTML = creatorsData.map(creator => `
+                <tr>
+                    <td><span class="creator-handle">${creator.handle}</span></td>
+                    <td class="currency">${formatCurrency(creator.gmv)}</td>
+                    <td class="number">${formatNumber(creator.orders)}</td>
+                    <td class="number">${creator.videos}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Populate agents table
+        function populateAgentsTable() {
+            const tbody = document.getElementById('agentsTable');
+            tbody.innerHTML = agentsData.map(agent => `
+                <tr>
+                    <td><span class="agent-emoji">${agent.emoji}</span> ${agent.name}</td>
+                    <td><span class="agent-dept">${agent.dept}</span></td>
+                    <td><span class="agent-schedule">${agent.lastRun}</span></td>
+                    <td><span class="status-badge ${agent.status}">${agent.emoji}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Charts
+        function initCharts() {
+            // Campaigns Chart
+            const campaignsCtx = document.getElementById('campaignsChart').getContext('2d');
+            new Chart(campaignsCtx, {
+                type: 'bar',
+                data: {
+                    labels: campaignsData.map(c => c.name),
+                    datasets: [{
+                        label: 'GMV (R$)',
+                        data: campaignsData.map(c => c.gmv),
+                        backgroundColor: [
+                            'rgba(222, 33, 101, 0.8)',
+                            'rgba(222, 33, 101, 0.65)',
+                            'rgba(222, 33, 101, 0.5)',
+                            'rgba(222, 33, 101, 0.35)',
+                            'rgba(222, 33, 101, 0.2)'
+                        ],
+                        borderColor: '#DE2165',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed.x);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gap Chart
+            const gapCtx = document.getElementById('gapChart').getContext('2d');
+            new Chart(gapCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Receita TAP (R$ 3,1M)', 'Gap Afiliado (R$ 48,1M)', 'GMV Direto (R$ 44,4M)'],
+                    datasets: [{
+                        data: [3106027.99, 48127324.28, 44400000.00],
+                        backgroundColor: [
+                            '#DE2165',
+                            '#F56565',
+                            '#A0AEC0'
+                        ],
+                        borderColor: ['white', 'white', 'white'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 16,
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.parsed);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Timeline
+        function initTimeline() {
+            const timelineAgents = [
+                { name: 'SEBASTIÃO', hour: 2.5, duration: 0.5 },
+                { name: 'JERÔNIMO', hour: 2.5, duration: 0.5 },
+                { name: 'OSVALDO', hour: 3, duration: 0.5 },
+                { name: 'TIAGO', hour: 6, duration: 0.5 },
+                { name: 'NELSON', hour: 8.15, duration: 0.5 },
+                { name: 'HUGO', hour: 9, duration: 0.5 },
+                { name: 'VALDIR', hour: 10.5, duration: 0.5 },
+                { name: 'JOAQUIM', hour: 14, duration: 0.5 },
+                { name: 'GERALDO', hour: 19, duration: 0.5 },
+                { name: 'RENATO', hour: 20, duration: 0.5 },
+                { name: 'CHICO', hour: 7.13, duration: 6.61 }
+            ];
+
+            const timeline = document.getElementById('timeline');
+            timelineAgents.forEach(agent => {
+                const left = (agent.hour / 24) * 95;
+                const width = (agent.duration / 24) * 95;
+                const bar = document.createElement('div');
+                bar.className = 'timeline-bar';
+                bar.style.left = left + '%';
+                bar.style.width = width + '%';
+                bar.textContent = agent.name;
+                bar.title = `${agent.name} - ${agent.hour.toFixed(1)}h`;
+                timeline.appendChild(bar);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            updateClock();
+            setInterval(updateClock, 1000);
+            populateCreatorsTable();
+            populateAgentsTable();
+            initCharts();
+            initTimeline();
+        });
+    </script>
+</body>
+</html>

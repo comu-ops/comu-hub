@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMU Hub — Feed de Atividades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0f1117;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #1d2035;
+            border-bottom: 1px solid #de2165;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #de2165;
+            letter-spacing: -0.5px;
+        }
+
+        .back-btn {
+            background-color: #de2165;
+            color: #1d2035;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background-color: #ff2d7f;
+            transform: translateY(-1px);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background-color: transparent;
+            color: #a0a0a0;
+            border: 1px solid #333;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            color: #e0e0e0;
+            border-color: #de2165;
+        }
+
+        .filter-btn.active {
+            background-color: #de2165;
+            color: #fff;
+            border-color: #de2165;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .summary-strip {
+            background-color: #1d2035;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+        }
+
+        .summary-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #de2165;
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feed-entry {
+            background-color: #1d2035;
+            border: 1px solid #333;
+            border-left: 4px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feed-entry:hover {
+            border-color: #de2165;
+            box-shadow: 0 0 20px rgba(222, 33, 101, 0.1);
+        }
+
+        .feed-entry.hidden {
+            display: none;
+        }
+
+        .feed-entry.alert-yellow {
+            border-left-color: #fbbf24;
+        }
+
+        .feed-entry.alert-red {
+            border-left-color: #ef4444;
+        }
+
+        .feed-entry.alert-green {
+            border-left-color: #4ade80;
+        }
+
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+
+        .feed-time {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            font-weight: 500;
+        }
+
+        .feed-agent {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            color: #de2165;
+        }
+
+        .agent-emoji {
+            font-size: 1.3rem;
+        }
+
+        .feed-department {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-left: 0.5rem;
+        }
+
+        .dept-tap-sales {
+            background-color: rgba(222, 33, 101, 0.2);
+            color: #de2165;
+        }
+
+        .dept-cap-ops {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .dept-comercial {
+            background-color: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .dept-growth {
+            background-color: rgba(96, 165, 250, 0.2);
+            color: #60a5fa;
+        }
+
+        .dept-comu-ops {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .feed-description {
+            color: #e0e0e0;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .feed-details {
+            display: none;
+            background-color: #151a2f;
+            border-top: 1px solid #333;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .feed-entry.expanded .feed-details {
+            display: block;
+        }
+
+        .feed-entry.expanded {
+            border-color: #de2165;
+        }
+
+        .expand-icon {
+            transition: transform 0.2s;
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+
+        .feed-entry.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .stats-bottom {
+            background-color: #1d2035;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #de2165;
+        }
+
+        .stat-with-alert {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            background-color: #fbbf24;
+            color: #1d2035;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .alert-badge.critical {
+            background-color: #ef4444;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .summary-strip {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .filters {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <div class="logo">COMU</div>
+                <button class="back-btn" onclick="window.parent.postMessage('goHome','*')">← Voltar</button>
+            </div>
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterByDept('todos', this)">Todos</button>
+                <button class="filter-btn" onclick="filterByDept('tap-sales', this)">TAP Sales</button>
+                <button class="filter-btn" onclick="filterByDept('cap-ops', this)">CAP Ops</button>
+                <button class="filter-btn" onclick="filterByDept('comercial', this)">Comercial</button>
+                <button class="filter-btn" onclick="filterByDept('growth', this)">Growth</button>
+                <button class="filter-btn" onclick="filterByDept('comu-ops', this)">COMU Ops</button>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="summary-strip">
+                <div class="summary-item">
+                    <div class="summary-label">Ações Hoje</div>
+                    <div class="summary-value">47</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Agentes Ativos</div>
+                    <div class="summary-value">11</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Última Atividade</div>
+                    <div class="summary-value">Agora</div>
+                </div>
+            </div>
+
+            <div class="feed" id="feedContainer"></div>
+
+            <div class="stats-bottom">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Últimas 24h</div>
+                        <div class="stat-value">47</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Agentes com Erro</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Agentes com Alerta</div>
+                        <div class="stat-with-alert">
+                            <div class="stat-value">2</div>
+                            <span class="alert-badge">VALDIR, JOAQUIM</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Próxima Execução</div>
+                        <div class="stat-value" style="font-size: 1rem;">SEBASTIÃO + JERÔNIMO às 02:30</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const feedData = [
+            // Today (16/03/2026) - newer entries first
+            {
+                time: '09:18',
+                agent: 'VALDIR',
+                emoji: '🎯',
+                description: 'enviou invites TAP para creators qualificados',
+                dept: 'tap-sales',
+                details: 'tap-sender-universal executado com sucesso. Invites processados e enviados.',
+                type: 'success'
+            },
+            {
+                time: '09:02',
+                agent: 'NELSON',
+                emoji: '🔗',
+                description: 'enviou conexões LinkedIn diárias (Seg)',
+                dept: 'growth',
+                details: 'linkedin-conexoes-diarias executado. Conexões de alto valor enviadas.',
+                type: 'success'
+            },
+            {
+                time: '08:53',
+                agent: 'OSVALDO',
+                emoji: '🔄',
+                description: 'rotation + tracker + samples — 3 tasks concluídas',
+                dept: 'cap-ops',
+                details: 'tap-collector-rotation (08:53), tap-tracker-conversao (06:33), cap-sample-approval (06:08). Todas OK.',
+                type: 'success'
+            },
+            {
+                time: '08:39',
+                agent: 'ADEMIR',
+                emoji: '⏰',
+                description: 'monitorou creators com conexão expirando nos próximos 15 dias',
+                dept: 'cap-ops',
+                details: 'tap-creator-expiring-monitor executado. Alertas gerados para AMs renovarem a tempo.',
+                type: 'success'
+            },
+            {
+                time: '08:09',
+                agent: 'NELSON',
+                emoji: '📝',
+                description: 'publicou post LinkedIn semanal (Segunda)',
+                dept: 'comu-ops',
+                details: 'linkedin-post-comu executado às 08:09. Post publicado com sucesso.',
+                type: 'success'
+            },
+            {
+                time: '07:12',
+                agent: 'SEBASTIÃO',
+                emoji: '📊',
+                description: 'coletou dados MCN: R$ 95,6M GMV, 4.102 creators | TAP: R$ 3,1M, 51 campanhas',
+                dept: 'comu-ops',
+                details: 'Custom Reports XLSX exportados e processados. JSONs atualizados em comu-data/latest/. Período: Mar 1-15.',
+                type: 'success'
+            },
+            {
+                time: '07:12',
+                agent: 'JERÔNIMO',
+                emoji: '📋',
+                description: 'resumo executivo gerado — GMV R$3,1M TAP, 957K pedidos, 81.4% ativação',
+                dept: 'tap-sales',
+                details: 'Consolidação TAP+MCN concluída. Top campanhas: BARBOURS R$944K, GUMMY R$612K.',
+                type: 'success'
+            },
+            {
+                time: '06:18',
+                agent: 'RENATO',
+                emoji: '💊',
+                description: 'amostras por marca aprovadas — regras individualizadas do Farol TAP',
+                dept: 'cap-ops',
+                details: 'cap-renato-amostras executado. Aprovações processadas com regras por marca (GMV, produto, público).',
+                type: 'success'
+            },
+            {
+                time: '06:08',
+                agent: 'TIAGO',
+                emoji: '📨',
+                description: 'amostras processadas via cap-sample-approval',
+                dept: 'tap-sales',
+                details: 'Processamento de amostras concluído com sucesso.',
+                type: 'success'
+            },
+            {
+                time: '04:03',
+                agent: 'HUGO',
+                emoji: '🔍',
+                description: '470 oportunidades comerciais atualizadas — R$50.8M gap identificado',
+                dept: 'comercial',
+                details: 'comercial-hugo-prospector executado (Seg). Shops sem TAP mapeados. Dashboard Comercial atualizado.',
+                type: 'success'
+            },
+
+            // Yesterday (15/03/2026)
+            {
+                time: '20:00',
+                agent: 'RENATO',
+                emoji: '💊',
+                description: 'aprovou 8 amostras CAP (FreeCo, Guday, Barbours, Amend)',
+                dept: 'cap-ops',
+                details: 'Processamento bem-sucedido de 4 marcas principais. Todas as amostras atingiram os critérios de aprovação.',
+                type: 'success'
+            },
+            {
+                time: '14:00',
+                agent: 'JOAQUIM',
+                emoji: '🔍',
+                description: 'verificou 38 creators — 0 convertidos | ⚠️ 29 não convertidos >3 dias',
+                dept: 'comercial',
+                details: 'Status crítico: Renova Be com 29 creators pendentes por mais de 3 dias.',
+                type: 'alert'
+            },
+            {
+                time: '10:30',
+                agent: 'VALDIR',
+                emoji: '🎯',
+                description: 'scouted 6/10 marcas — 12 mensagens enviadas | ⚠️ 4 timeouts',
+                dept: 'growth',
+                details: '4 marcas com timeout na resposta (Dot, Renova Be, Noma, Zalia).',
+                type: 'alert'
+            },
+            {
+                time: '09:00',
+                agent: 'HUGO',
+                emoji: '🔍',
+                description: '470 oportunidades identificadas — R$50.8M gap',
+                dept: 'comercial',
+                details: 'Prospector semanal executado. Dashboard Comercial atualizado.',
+                type: 'success'
+            },
+            {
+                time: '08:09',
+                agent: 'NELSON',
+                emoji: '📝',
+                description: 'publicou post LinkedIn — "Como escalar no TikTok Shop BR"',
+                dept: 'comu-ops',
+                details: 'Post publicado às 08:09. Alcance esperado: 2-5k impressões.',
+                type: 'success'
+            },
+            {
+                time: '06:00',
+                agent: 'TIAGO',
+                emoji: '📨',
+                description: 'fila vazia, sem envios',
+                dept: 'comercial',
+                details: 'Sistema de envios sem atividades pendentes.',
+                type: 'success'
+            },
+            {
+                time: '03:04',
+                agent: 'OSVALDO',
+                emoji: '🔄',
+                description: 'renovou 715 parcerias expirando (1d: 23, 15d: 312, 30d: 380)',
+                dept: 'cap-ops',
+                details: 'Distribuição de renovações processada com sucesso.',
+                type: 'success'
+            },
+            {
+                time: '02:30',
+                agent: 'SEBASTIÃO',
+                emoji: '📊',
+                description: 'coletou dados MCN: R$ 82.5M GMV, 4.086 creators',
+                dept: 'comu-ops',
+                details: 'Coleta de dados executada com sucesso. Base atualizada.',
+                type: 'success'
+            },
+            {
+                time: '02:30',
+                agent: 'JERÔNIMO',
+                emoji: '📋',
+                description: 'coletou 48 creators de 3 marcas (Magic Muuh, Iszi, Vera Valle)',
+                dept: 'tap-sales',
+                details: 'Distribuição: Magic Muuh 10, Iszi 36, Vera Valle 2.',
+                type: 'success'
+            }
+        ];
+
+        function renderFeed() {
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = '';
+
+            feedData.forEach((entry, index) => {
+                const entryEl = document.createElement('div');
+                entryEl.className = `feed-entry ${entry.type === 'alert' ? 'alert-yellow' : ''}`;
+                entryEl.dataset.dept = entry.dept;
+
+                const deptClass = `dept-${entry.dept}`;
+                const deptName = {
+                    'tap-sales': 'TAP Sales',
+                    'cap-ops': 'CAP Ops',
+                    'comercial': 'Comercial',
+                    'growth': 'Growth',
+                    'comu-ops': 'COMU Ops'
+                }[entry.dept];
+
+                entryEl.innerHTML = `
+                    <div class="feed-header">
+                        <div class="feed-time">[${entry.time}]</div>
+                        <div style="flex: 1; margin-left: 1rem;">
+                            <div class="feed-agent">
+                                <span class="agent-emoji">${entry.emoji}</span>
+                                ${entry.agent}
+                                <span class="feed-department ${deptClass}">${deptName}</span>
+                            </div>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="feed-description">${entry.description}</div>
+                    <div class="feed-details">${entry.details}</div>
+                `;
+
+                entryEl.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                });
+
+                container.appendChild(entryEl);
+            });
+        }
+
+        function filterByDept(dept, button) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Filter entries
+            const entries = document.querySelectorAll('.feed-entry');
+            entries.forEach(entry => {
+                if (dept === 'todos' || entry.dataset.dept === dept) {
+                    entry.classList.remove('hidden');
+                } else {
+                    entry.classList.add('hidden');
+                }
+            });
+        }
+
+        // Initialize on load
+        renderFeed();
+    </script>
+</body>
+</html>
