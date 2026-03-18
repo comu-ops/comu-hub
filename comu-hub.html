@@ -1,3 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMU Hub — Command Center</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#DE2165">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="COMU Hub">
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+    <meta name="description" content="Central de operações COMU — TAP, CAP, Comercial, Automação e Analytics em tempo real.">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#DE2165;--primary-light:rgba(222,33,101,0.08);--dark:#1D2035;--sidebar-w:230px;--green:#10B981;--yellow:#F59E0B;--gray:#6B7280;--blue:#6366F1;--purple:#8B5CF6}
+        body{font-family:'Inter',-apple-system,sans-serif;overflow:hidden;height:100vh;--bg:#F8F9FB;--card:#FFF;--border:#E5E7EB;--t1:#0F172A;--t2:#64748B;--t3:#94A3B8;--sb-bg:#1D2035;--sb-txt:rgba(255,255,255,0.50);--sb-hover:rgba(255,255,255,0.9);--sb-active-bg:rgba(222,33,101,0.15);--sb-active:#DE2165;background:var(--bg);color:var(--t1)}
+        body.dark{--bg:#13141B;--card:#1E2028;--border:rgba(255,255,255,0.06);--t1:#E5E7EB;--t2:#9CA3AF;--t3:#6B7280;--sb-bg:#0F1017}
+        .L{display:flex;height:100vh}
+
+        /* SIDEBAR */
+        .sb{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;background:var(--sb-bg);display:flex;flex-direction:column;z-index:100}
+        .sb-h{padding:16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .sb-logo{width:32px;height:32px;min-width:32px;background:#DE2165;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+        .sb-brand-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.5px}
+        .sb-brand-sub{font-size:8px;font-weight:600;color:rgba(255,255,255,0.25);letter-spacing:1.5px;text-transform:uppercase}
+        .sb-nav{flex:1;overflow-y:auto;padding:4px 8px}
+        .sb-nav::-webkit-scrollbar{width:2px}
+        .sb-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+        .st{font-size:9px;font-weight:700;color:rgba(255,255,255,0.16);letter-spacing:1.5px;text-transform:uppercase;padding:14px 10px 5px}
+        .ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;color:var(--sb-txt);font-size:12.5px;font-weight:500;transition:all 0.15s;margin-bottom:1px;white-space:nowrap}
+        .ni:hover{background:rgba(255,255,255,0.05);color:var(--sb-hover)}
+        .ni.a{background:var(--sb-active-bg);color:var(--sb-active);font-weight:600}
+        .ni-i{width:18px;min-width:18px;text-align:center;font-size:14px}
+        .ni-r{margin-left:auto;display:flex;align-items:center;gap:5px}
+        .b{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.3px}
+        .b-live{background:rgba(222,33,101,0.2);color:#DE2165}
+        .b-count{font-size:9px;color:rgba(255,255,255,0.22);font-weight:500}
+        .b-agents{font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(16,185,129,0.15);color:#10B981}
+        .sb-div{height:1px;background:rgba(255,255,255,0.04);margin:5px 10px}
+        .sb-ft{padding:8px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:4px}
+        .fb{flex:1;padding:6px;border:none;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.3);border-radius:5px;cursor:pointer;font-size:11px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+        .fb:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7)}
+
+        /* MAIN */
+        .mn{flex:1;height:100vh;overflow:hidden;position:relative}
+        #contentFrame{position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:none;z-index:5}
+        .dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+        .dg{background:#10B981}.dy{background:#F59E0B}.dgr{background:#4B5563}
+        .dp{animation:p 2s infinite}
+        @keyframes p{0%,100%{opacity:1}50%{opacity:0.4}}
+
+        /* VIEW */
+        .view{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);overflow-y:auto;z-index:5}
+        .view.vis{display:block}
+
+        /* ===== HOME ===== */
+        .home{display:none;position:absolute;top:0;left:0;right:0;bottom:0;flex-direction:column;align-items:stretch;padding:28px 32px;background:var(--bg);overflow-y:auto;z-index:5}
+        .home.vis{display:flex}
+        .h-logo{width:64px;height:64px;background:linear-gradient(135deg,#DE2165,#FF4D8D);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;margin-bottom:16px;box-shadow:0 12px 40px rgba(222,33,101,0.25)}
+        .home h1{font-size:22px;font-weight:800;margin-bottom:4px}
+        .home>p{font-size:12px;color:var(--t2);margin-bottom:24px;max-width:460px;line-height:1.6}
+        .h-stats{display:flex;gap:24px;margin-bottom:28px}
+        .h-sv{font-size:22px;font-weight:800;color:#DE2165}
+        .h-sl{font-size:9px;color:var(--t2);margin-top:2px}
+        .h-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:620px;width:100%}
+        .h-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 10px;cursor:pointer;transition:all 0.2s;text-align:center}
+        .h-card:hover{border-color:#DE2165;box-shadow:0 4px 16px rgba(222,33,101,0.12);transform:translateY(-2px)}
+        .h-card-ic{font-size:24px;margin-bottom:5px}
+        .h-card-t{font-size:11px;font-weight:700;color:var(--t1)}
+        .h-card-s{font-size:9px;color:var(--t2);margin-top:2px}
+        .h-ft{margin-top:22px;font-size:9px;color:var(--t3);display:flex;align-items:center;gap:5px}
+
+        /* ===== AGENT MAP ===== */
+        .map-hdr{padding:24px 32px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--card);position:sticky;top:0;z-index:10}
+        .map-hdr h2{font-size:18px;font-weight:800}
+        .map-hdr p{font-size:11px;color:var(--t2);margin-top:1px}
+        .map-stats{display:flex;gap:16px;align-items:center}
+        .ms{text-align:center}
+        .ms-v{font-size:16px;font-weight:800}
+        .ms-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px}
+        .vtog{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-left:12px}
+        .vtog-b{padding:6px 12px;font-size:11px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--t2);transition:all 0.15s}
+        .vtog-b.a{background:#DE2165;color:#fff}
+        .map-body{padding:24px 32px}
+
+        /* FLOW DIAGRAM */
+        .flow-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;overflow-x:auto}
+        .flow-title{font-size:13px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+        .flow{display:flex;align-items:flex-start;gap:4px;min-width:max-content;padding:4px 0}
+        .flow-col{display:flex;flex-direction:column;align-items:center;gap:5px}
+        .flow-lbl{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+        .flow-ag{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+        .flow-ag:hover{transform:scale(1.06);box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .flow-ag.at{background:rgba(16,185,129,0.08);color:#10B981;border:1px solid rgba(16,185,129,0.15)}
+        .flow-ag.pa{background:rgba(245,158,11,0.08);color:#F59E0B;border:1px solid rgba(245,158,11,0.15)}
+        .flow-ag.pl{background:rgba(107,114,128,0.08);color:#9CA3AF;border:1px solid rgba(107,114,128,0.1)}
+        .flow-arr{color:var(--t3);font-size:16px;display:flex;align-items:center;padding-top:16px}
+
+        /* GRID */
+        .ag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+        .ag-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+        .ag-card:hover{border-color:rgba(222,33,101,0.3);box-shadow:0 8px 24px rgba(0,0,0,0.06);transform:translateY(-2px)}
+        .ag-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+        .ag-card.at::before{background:linear-gradient(90deg,#10B981,#34D399)}
+        .ag-card.pa::before{background:linear-gradient(90deg,#F59E0B,#FBBF24)}
+        .ag-card.pl::before{background:linear-gradient(90deg,#6B7280,#9CA3AF)}
+        .ag-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+        .ag-ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .ag-ic.at{background:rgba(16,185,129,0.08)}.ag-ic.pa{background:rgba(245,158,11,0.08)}.ag-ic.pl{background:rgba(107,114,128,0.06)}
+        .ag-nm{font-size:15px;font-weight:800;color:var(--t1)}
+        .ag-rl{font-size:10px;color:var(--t2);margin-top:1px}
+        .ag-st{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:16px;margin-top:3px}
+        .ag-st.at{background:rgba(16,185,129,0.1);color:#10B981}
+        .ag-st.pa{background:rgba(245,158,11,0.1);color:#F59E0B}
+        .ag-st.pl{background:rgba(107,114,128,0.1);color:#9CA3AF}
+        .ag-desc{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .ag-meta{display:flex;gap:10px;flex-wrap:wrap}
+        .ag-mi{font-size:9px;color:var(--t3);display:flex;align-items:center;gap:3px}
+        .ag-mi strong{color:var(--t2);font-weight:600}
+
+        /* MIND MAP */
+        .ag-mind{display:none;position:relative;width:100%;height:520px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+        .ag-mind.vis{display:block}
+        .ag-mind svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+        .ag-mind .mm-node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:transform 0.2s;z-index:2}
+        .ag-mind .mm-node:hover{transform:scale(1.1)}
+        .ag-mind .mm-bubble{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.08);border:2px solid transparent}
+        .ag-mind .mm-bubble.at{background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.3)}
+        .ag-mind .mm-bubble.pa{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.3)}
+        .ag-mind .mm-bubble.pl{background:rgba(107,114,128,0.1);border-color:rgba(107,114,128,0.2)}
+        .ag-mind .mm-name{font-size:10px;font-weight:800;color:var(--t1);white-space:nowrap}
+        .ag-mind .mm-role{font-size:8px;color:var(--t2);white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;text-align:center}
+        .ag-mind .mm-layer{position:absolute;font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;writing-mode:vertical-rl;text-orientation:mixed;opacity:0.25}
+
+        /* LIST TABLE */
+        .ag-list{display:none}
+        .ag-list.vis{display:block}
+        .ag-grid.vis{display:grid}
+        .alt{width:100%;border-collapse:separate;border-spacing:0}
+        .alt th{text-align:left;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0}
+        .alt td{padding:12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--t2);vertical-align:middle}
+        .alt tbody tr{cursor:pointer;transition:background 0.15s}
+        .alt tbody tr:hover{background:var(--primary-light)}
+        .alt-nm{display:flex;align-items:center;gap:8px}
+        .alt-ic{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px}
+        .alt-t{font-weight:700;color:var(--t1);font-size:13px}
+
+        /* ===== AGENT DETAIL ===== */
+        .det-hdr{padding:24px 32px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+        .det-back{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;margin-bottom:14px;padding:5px 9px;border-radius:5px;transition:all 0.15s}
+        .det-back:hover{background:var(--primary-light);color:var(--primary)}
+        .det-top{display:flex;align-items:center;gap:14px}
+        .det-av{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px}
+        .det-av.at{background:rgba(16,185,129,0.1);border:2px solid rgba(16,185,129,0.2)}
+        .det-av.pa{background:rgba(245,158,11,0.1);border:2px solid rgba(245,158,11,0.2)}
+        .det-av.pl{background:rgba(107,114,128,0.1);border:2px solid rgba(107,114,128,0.12)}
+        .det-nm{font-size:20px;font-weight:800}
+        .det-rl{font-size:13px;color:var(--t2);margin-top:1px}
+        .det-body{padding:24px 32px}
+        .det-desc{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;margin-bottom:18px;line-height:1.7;font-size:13px;color:var(--t2)}
+        .det-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:20px}
+        .det-c{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px}
+        .det-cl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+        .det-cv{font-size:13px;font-weight:600;color:var(--t1);line-height:1.5}
+        .dep-flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;margin-top:12px}
+        .dep-node{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s}
+        .dep-node:hover{transform:scale(1.05)}
+        .dep-node.self{background:rgba(222,33,101,0.1);color:#DE2165;border:1px solid rgba(222,33,101,0.2)}
+        .dep-node.up{background:rgba(16,185,129,0.08);color:#10B981;border:1px solid rgba(16,185,129,0.12)}
+        .dep-node.dn{background:rgba(99,102,241,0.08);color:#6366F1;border:1px solid rgba(99,102,241,0.12)}
+        .dep-arr{color:var(--t3);font-size:13px}
+
+        /* ===== REPORT TEMPLATES ===== */
+        .rpt-hdr{padding:24px 32px 18px;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:0;z-index:10}
+        .rpt-hdr h2{font-size:18px;font-weight:800}
+        .rpt-hdr p{font-size:11px;color:var(--t2);margin-top:1px}
+        .rpt-body{padding:24px 32px}
+        .rpt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+        .rpt-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+        .rpt-card:hover{border-color:rgba(222,33,101,0.3);box-shadow:0 6px 20px rgba(0,0,0,0.06);transform:translateY(-2px)}
+        .rpt-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+        .rpt-ic{font-size:28px;margin-bottom:10px}
+        .rpt-t{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:3px}
+        .rpt-s{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:12px}
+        .rpt-tags{display:flex;flex-wrap:wrap;gap:5px}
+        .rpt-tag{font-size:9px;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--primary-light);color:#DE2165}
+        .rpt-tag.g{background:rgba(16,185,129,0.08);color:#10B981}
+        .rpt-tag.b{background:rgba(99,102,241,0.08);color:#6366F1}
+        .rpt-tag.y{background:rgba(245,158,11,0.08);color:#F59E0B}
+
+        /* ===== BLUEPRINT ===== */
+        .bp-hdr{padding:24px 32px 18px;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:0;z-index:10}
+        .bp-hdr h2{font-size:18px;font-weight:800}
+        .bp-hdr p{font-size:11px;color:var(--t2);margin-top:1px}
+        .bp-body{padding:24px 32px}
+        .bp-section{margin-bottom:24px}
+        .bp-section-t{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+        .bp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+        .bp-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;transition:all 0.2s;cursor:pointer}
+        .bp-card:hover{border-color:rgba(222,33,101,0.3);box-shadow:0 4px 14px rgba(0,0,0,0.04)}
+        .bp-card-t{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+        .bp-card-s{font-size:11px;color:var(--t2);line-height:1.4}
+        .bp-card-ic{font-size:22px;margin-bottom:8px}
+    </style>
+</head>
+<body>
+<div class="L">
+    <div class="sb" id="sidebar">
+        <div class="sb-h">
+            <div class="sb-logo">C</div>
+            <div>
+                <div class="sb-brand-name">COMU</div>
+                <div class="sb-brand-sub">Command Center</div>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <div class="st">Dashboards</div>
+            <a href="javascript:void(0)" class="ni a" onclick="go('home',this)" id="nav-home">
+                <span class="ni-i">🏠</span><span>Home</span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-executivo.html',this)">
+                <span class="ni-i">📊</span><span>Executivo</span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-funil.html',this)">
+                <span class="ni-i">🔄</span><span>Funil TAP</span>
+                <span class="ni-r"><span class="b" style="background:rgba(16,185,129,0.2);color:#10B981">NOVO</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-tap.html',this)">
+                <span class="ni-i">🏷️</span><span>TAP Marcas</span>
+                <span class="ni-r"><span class="b-count">51</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-cap.html',this)">
+                <span class="ni-i">🎬</span><span>CAP Creators</span>
+                <span class="ni-r"><span class="b-count">4.102</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-cap-gestao.html',this)">
+                <span class="ni-i">🏅</span><span>CAP Gestão AM</span>
+                <span class="ni-r"><span class="b" style="background:rgba(16,185,129,0.2);color:#10B981">NOVO</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-comercial.html',this)">
+                <span class="ni-i">💼</span><span>Comercial</span>
+                <span class="ni-r"><span class="b-count">470</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-gestao-ams.html',this)">
+                <span class="ni-i">👥</span><span>Gestão de AMs</span>
+                <span class="ni-r"><span class="b-count">10</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-automacao.html',this)">
+                <span class="ni-i">⚙️</span><span>Automação</span>
+                <span class="ni-r"><span class="b" style="background:rgba(16,185,129,0.2);color:#10B981">NOVO</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-amostras.html',this)">
+                <span class="ni-i">🧪</span><span>Amostras</span>
+                <span class="ni-r"><span class="b" style="background:rgba(16,185,129,0.2);color:#10B981">NOVO</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="go('comu-dashboard-feed.html',this)">
+                <span class="ni-i">📡</span><span>Feed Atividades</span>
+                <span class="ni-r"><span class="b" style="background:rgba(16,185,129,0.2);color:#10B981">NOVO</span></span>
+            </a>
+
+            <div class="sb-div"></div>
+            <div class="st">Ferramentas</div>
+            <a href="javascript:void(0)" class="ni" onclick="goView('agentMap',this)" id="nav-agents">
+                <span class="ni-i">🤖</span><span>Agentes IA</span>
+                <span class="ni-r"><span class="b-agents">13</span></span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="goView('blueprintView',this)" id="nav-bp">
+                <span class="ni-i">📐</span><span>Blueprint</span>
+            </a>
+            <a href="javascript:void(0)" class="ni" onclick="goView('reportsView',this)" id="nav-rpt">
+                <span class="ni-i">📄</span><span>Reports</span>
+            </a>
+        </div>
+        <div class="sb-ft">
+            <button class="fb" onclick="toggleTheme()" title="Alternar tema">
+                <span id="thI">🌙</span><span id="thL">Dark</span>
+            </button>
+            <button class="fb" onclick="toggleSidebar()" title="Recolher sidebar">
+                <span id="sbI">◀</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="mn">
+        <!-- HOME -->
+        <div class="home vis" id="homeView">
+            <div style="width:100%;max-width:100%;text-align:left;padding:0 8px">
+                <!-- HEADER -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+                    <div style="display:flex;align-items:center;gap:16px">
+                        <div class="h-logo">C</div>
+                        <div>
+                            <h1 style="text-align:left;font-size:26px;letter-spacing:-0.5px">COMU Command Center</h1>
+                            <div style="font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px;margin-top:3px">
+                                <span class="dot dg dp"></span> Dados: 01–15 Mar 2026 · TikTok Partner Center · 13 agentes ativos · Atualizado 17/03 2026
+                            </div>
+                        </div>
+                    </div>
+                    <!-- NAV CARDS inline no header -->
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                        <div class="h-card" onclick="go('comu-dashboard-executivo.html',document.querySelectorAll('.ni')[1])" style="padding:10px 16px;border-radius:8px">
+                            <div class="h-card-t" style="font-size:11px">📊 Executivo</div>
+                        </div>
+                        <div class="h-card" onclick="go('comu-dashboard-funil.html',document.querySelectorAll('.ni')[2])" style="padding:10px 16px;border-radius:8px">
+                            <div class="h-card-t" style="font-size:11px">🔄 Funil</div>
+                        </div>
+                        <div class="h-card" onclick="go('comu-dashboard-tap.html',document.querySelectorAll('.ni')[3])" style="padding:10px 16px;border-radius:8px">
+                            <div class="h-card-t" style="font-size:11px">🏷️ TAP</div>
+                        </div>
+                        <div class="h-card" onclick="go('comu-dashboard-cap.html',document.querySelectorAll('.ni')[4])" style="padding:10px 16px;border-radius:8px">
+                            <div class="h-card-t" style="font-size:11px">🎬 CAP</div>
+                        </div>
+                        <div class="h-card" onclick="go('comu-dashboard-comercial.html',document.querySelectorAll('.ni')[5])" style="padding:10px 16px;border-radius:8px">
+                            <div class="h-card-t" style="font-size:11px">💼 Comercial</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HOME GRID — 8 DASHBOARDS -->
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;max-width:1100px">
+                    <div class="h-card" onclick="go('comu-dashboard-executivo.html',document.querySelectorAll('.ni')[1])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">📊</div>
+                        <div class="h-card-t">Executivo</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">Visão 360° do negócio — GMV, Gap, Receita, Agentes</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-funil.html',document.querySelectorAll('.ni')[2])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">🔄</div>
+                        <div class="h-card-t">Funil TAP</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">Funil de conversão CAP→TAP — onde o dinheiro trava</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-tap.html',document.querySelectorAll('.ni')[3])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">🏷️</div>
+                        <div class="h-card-t">TAP Marcas</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">51 campanhas TAP ativas com performance por marca</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-cap.html',document.querySelectorAll('.ni')[4])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">🎬</div>
+                        <div class="h-card-t">CAP Creators</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">4.102 creators no MCN com métricas detalhadas</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-comercial.html',document.querySelectorAll('.ni')[5])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">💼</div>
+                        <div class="h-card-t">Comercial</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">470 oportunidades do HUGO — R$50.8M de gap</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-gestao-ams.html',document.querySelectorAll('.ni')[6])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">👥</div>
+                        <div class="h-card-t">Gestão de AMs</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">Visão por AM — TAP e Star Club com creators</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-automacao.html',document.querySelectorAll('.ni')[7])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">⚙️</div>
+                        <div class="h-card-t">Automação</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">Monitor dos 11 agentes e mapa de automação por marca</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-amostras.html',document.querySelectorAll('.ni')[8])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">🧪</div>
+                        <div class="h-card-t">Amostras</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">GERALDO + RENATO — aprovações TAP e CAP</div>
+                    </div>
+                    <div class="h-card" onclick="go('comu-dashboard-feed.html',document.querySelectorAll('.ni')[9])" style="cursor:pointer;padding:16px">
+                        <div class="h-card-ic">📡</div>
+                        <div class="h-card-t">Feed Atividades</div>
+                        <div class="h-card-s" style="font-size:9px;line-height:1.4;margin-top:6px">Timeline em tempo real dos 11 agentes</div>
+                    </div>
+                </div>
+
+                <!-- RANKINGS + INSIGHTS (larger) -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+                    <!-- TOP CAMPANHAS -->
+                    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px">
+                        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px">🏆 Top 5 Campanhas</div>
+                        <div style="font-size:14px;color:var(--t2)">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">1. BARBOURS</span><strong style="color:#DE2165;font-size:16px">R$ 943,9K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">2. GUMMY</span><strong style="color:#DE2165;font-size:16px">R$ 611,8K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">3. ADEUS</span><strong style="color:var(--t1);font-size:15px">R$ 224,0K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">4. GOCASE</span><strong style="color:var(--t1);font-size:15px">R$ 119,3K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><span style="font-weight:600">5. AURA</span><strong style="color:var(--t1);font-size:15px">R$ 115,4K</strong></div>
+                        </div>
+                    </div>
+                    <!-- TOP CREATORS -->
+                    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px">
+                        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px">⭐ Top 5 Creators</div>
+                        <div style="font-size:14px;color:var(--t2)">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">1. @felipe.tomio</span><strong style="color:#DE2165;font-size:16px">R$ 846,4K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">2. @laavsri</span><strong style="color:#DE2165;font-size:16px">R$ 700,1K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">3. @ericamcabeluda</span><strong style="color:var(--t1);font-size:15px">R$ 611,3K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">4. @luisasoaress11</span><strong style="color:var(--t1);font-size:15px">R$ 527,5K</strong></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><span style="font-weight:600">5. @amandaxavieer</span><strong style="color:var(--t1);font-size:15px">R$ 507,7K</strong></div>
+                        </div>
+                    </div>
+                    <!-- INSIGHTS + ALERTS -->
+                    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px">
+                        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px">📡 Insights & Alertas</div>
+                        <div style="font-size:14px;color:var(--t2)">
+                            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)"><span class="dot dy" style="width:8px;height:8px"></span> <strong style="color:var(--t1)">761</strong> creators com GMV zero</div>
+                            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)"><span class="dot dg" style="width:8px;height:8px"></span> Taxa de ativação: <strong style="color:var(--t1)">81,4%</strong></div>
+                            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)"><span class="dot dg" style="width:8px;height:8px"></span> Vídeo: <strong style="color:var(--t1)">63,5%</strong> do GMV</div>
+                            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)"><span class="dot dg" style="width:8px;height:8px"></span> LIVE: <strong style="color:var(--t1)">35,6%</strong> do GMV (19,2K streams)</div>
+                            <div style="display:flex;align-items:center;gap:8px;padding:9px 0"><span class="dot dy" style="width:8px;height:8px"></span> Refund TAP: <strong style="color:#F59E0B">R$ 148,2K</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AGENT MAP -->
+        <div class="view" id="agentMap">
+            <div class="map-hdr">
+                <div>
+                    <h2>🤖 Mapa de Agentes</h2>
+                    <p>Ecossistema de 13 agentes IA da operação COMU</p>
+                </div>
+                <div class="map-stats">
+                    <div class="ms"><div class="ms-v" style="color:#10B981">11</div><div class="ms-l">Ativos</div></div>
+                    <div class="ms"><div class="ms-v" style="color:#F59E0B">0</div><div class="ms-l">Parcial</div></div>
+                    <div class="ms"><div class="ms-v" style="color:#9CA3AF">2</div><div class="ms-l">Planejados</div></div>
+                    <div class="vtog">
+                        <button class="vtog-b a" onclick="swView('grid',this)">Grid</button>
+                        <button class="vtog-b" onclick="swView('list',this)">Lista</button>
+                        <button class="vtog-b" onclick="swView('mind',this)">Mind Map</button>
+                    </div>
+                </div>
+            </div>
+            <div class="map-body">
+                <div class="flow-box">
+                    <div class="flow-title">⚡ Fluxo de Dados — Pipeline de Dependências</div>
+                    <div class="flow" id="flowDiag"></div>
+                </div>
+                <div class="ag-grid vis" id="agGrid"></div>
+                <div class="ag-mind" id="agMind"></div>
+                <div class="ag-list" id="agList">
+                    <table class="alt"><thead><tr>
+                        <th>Agente</th><th>Função</th><th>Status</th><th>Schedule</th><th>Última Exec.</th><th>Métricas</th>
+                    </tr></thead><tbody id="agLB"></tbody></table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AGENT DETAIL -->
+        <div class="view" id="agentDetail"></div>
+
+        <!-- REPORT TEMPLATES -->
+        <div class="view" id="reportsView">
+            <div class="rpt-hdr">
+                <h2>📄 Report Templates</h2>
+                <p>Modelos de relatório prontos para uso — gerados pelos agentes</p>
+            </div>
+            <div class="rpt-body">
+                <div class="rpt-grid" id="rptGrid"></div>
+            </div>
+        </div>
+
+        <!-- BLUEPRINT -->
+        <div class="view" id="blueprintView">
+            <div class="bp-hdr">
+                <h2>📐 Blueprint — Arquitetura COMU</h2>
+                <p>Estrutura operacional, hierarquias e fluxos de dados</p>
+            </div>
+            <div class="bp-body" id="bpBody"></div>
+        </div>
+
+        <!-- IFRAME -->
+        <iframe id="contentFrame" src=""></iframe>
+    </div>
+</div>
+
+<script>
+let isDark = false;
+
+const AGENTS = [
+    { name:"SEBASTIÃO", icon:"📦", role:"Coletor Universal", status:"ATIVO", schedule:"Diário 7am (seg–sáb)", lastRun:"17/03/2026 07:12", description:"Motor de dados de toda a operação.", inputs:"TikTok Partner Center → Custom Report XLSX", outputs:"tap-campaigns.json · mcn-creators.json · summary.json", scripts:"comu-collector.py · comu-updater.py", metrics:"51 campanhas · 4.102 creators · R$ 54,3M GMV", layer:"coleta", depends:[], feeds:["JERÔNIMO","CHICO","JOAQUIM"] },
+    { name:"TIAGO", icon:"🚀", role:"Coletor TAP via Reacher", status:"ATIVO", schedule:"Conforme demanda", lastRun:"17/03/2026", description:"Coleta creators via Partner Center → Find Creators.", inputs:"Partner Center · Farol TAP", outputs:"tap-queues/*.json", scripts:"tap-collector-reacher-universal", metrics:"Coleta universal", layer:"coleta", depends:[], feeds:["VALDIR","OSVALDO"] },
+    { name:"RUBENS", icon:"🏪", role:"Coletor via Seller Center / TSP", status:"ATIVO", schedule:"Conforme demanda", lastRun:"17/03/2026", description:"Coleta creators de marcas que usam Seller Center.", inputs:"Seller Center · TSP", outputs:"tap-queues/*.json", scripts:"tap-collector-seller-center-universal", metrics:"Coleta Seller Center", layer:"coleta", depends:[], feeds:["VALDIR","OSVALDO"] },
+    { name:"JERÔNIMO", icon:"⚡", role:"Relatório Diário de Vendas", status:"ATIVO", schedule:"Gerado pelo SEBASTIÃO", lastRun:"17/03/2026 07:12", description:"Consolida TAP + MCN em resumo executivo.", inputs:"summary.json (SEBASTIÃO)", outputs:"Relatório texto · KPIs", scripts:"Integrado ao comu-collector.py", metrics:"GMV R$ 54,3M · 957K pedidos", layer:"analise", depends:["SEBASTIÃO"], feeds:["JOAQUIM"] },
+    { name:"CHICO", icon:"📋", role:"KPI Semanal + Análise Estratégica por AM", status:"ATIVO", schedule:"Terças (9 AMs, 7h–14h)", lastRun:"17/03/2026", description:"Relatório semanal v2 com KPIs + análise estratégica por AM.", inputs:"Google Sheets Farol TAP · Partner Center", outputs:"Relatório KPI + análise estratégica", scripts:"comu-kpi-aline-v2 · comu-kpi-carol-goulart-v2 · comu-kpi-carol-mello-v2 · comu-kpi-duda-v2 · comu-kpi-fabi-v2 · comu-kpi-mirela-v2 · comu-kpi-victoria-v2 · comu-kpi-carol-cantu-v2 · comu-kpi-semanal-v2", metrics:"9 AMs + Semanal", layer:"analise", depends:["SEBASTIÃO"], feeds:["JOAQUIM"] },
+    { name:"OSVALDO", icon:"⏰", role:"Monitor de Creators Expirando", status:"ATIVO", schedule:"Diário 3am", lastRun:"17/03/2026 08:39", description:"Monitora creators com conexão expirando.", inputs:"Partner Center · TIAGO + RUBENS", outputs:"Lista expirando · Alertas AMs", scripts:"tap-creator-expiring-monitor-v2", metrics:"Monitoramento 24/7", layer:"operacao", depends:["TIAGO","RUBENS"], feeds:[] },
+    { name:"NELSON", icon:"🔗", role:"Conexões com Creators no LinkedIn", status:"ATIVO", schedule:"Diário 10:30am", lastRun:"17/03/2026 08:09", description:"Processa conexões do LinkedIn para o pipeline TAP.", inputs:"LinkedIn · Farol TAP", outputs:"Relatório de conexões", scripts:"linkedin-connections-processor", metrics:"Conexões diárias", layer:"operacao", depends:["SEBASTIÃO"], feeds:[] },
+    { name:"VALDIR", icon:"📤", role:"Sender Universal TAP", status:"ATIVO", schedule:"Diário 6am", lastRun:"17/03/2026 09:18", description:"Envia convites TAP para creators coletados.", inputs:"tap-queues/*.json", outputs:"Convites enviados", scripts:"tap-sender-universal", metrics:"Envio ativo", layer:"operacao", depends:["TIAGO","RUBENS"], feeds:["JOAQUIM"] },
+    { name:"RENATO", icon:"🧪", role:"Aprovação de Amostras por Marca", status:"ATIVO", schedule:"Diário 06:15", lastRun:"17/03/2026 06:18", description:"Aprovação de amostras com regras do Farol TAP.", inputs:"Farol TAP · Partner Center", outputs:"Amostras aprovadas/rejeitadas", scripts:"cap-renato-amostras · cap-sample-approval-v2", metrics:"Regras por marca", layer:"operacao", depends:[], feeds:[] },
+    { name:"PRISCILA", icon:"🔓", role:"Gestão de Desvínculos MCN", status:"ATIVO", schedule:"Diário", lastRun:"17/03/2026", description:"Gerencia solicitações de desvínculo de creators da MCN.", inputs:"Partner Center — solicitações", outputs:"Desvínculos processados", scripts:"tap-decline-unlink-requests", metrics:"Gestão diária MCN", layer:"operacao", depends:[], feeds:[] },
+    { name:"JOAQUIM", icon:"🎯", role:"Executivo 360°", status:"PLANEJADO", schedule:"Semanal (a definir)", lastRun:"—", description:"Visão executiva completa.", inputs:"Todos os agentes", outputs:"Dashboard executivo cross", scripts:"Em desenvolvimento", metrics:"Em planejamento", layer:"estrategia", depends:["SEBASTIÃO","JERÔNIMO","CHICO","VALDIR"], feeds:[] },
+    { name:"HUGO", icon:"🔍", role:"Prospector Comercial", status:"ATIVO", schedule:"Seg+Qui 9h", lastRun:"17/03/2026 04:03", description:"Mapeia shops/marcas do TikTok Shop Brasil.", inputs:"Partner Center · MCN Shop Data", outputs:"Lista de prospects · Dashboard Comercial", scripts:"comercial-hugo-prospector", metrics:"491 shops · 470 oportunidades · R$50,8M gap", layer:"expansao", depends:["SEBASTIÃO"], feeds:["GERALDO"] },
+    { name:"GERALDO", icon:"🏢", role:"Prospecção de Novas Marcas", status:"PLANEJADO", schedule:"A definir", lastRun:"—", description:"Prospecção de novas marcas para o TAP.", inputs:"Market data · HUGO", outputs:"Leads qualificados", scripts:"Em desenvolvimento", metrics:"Em planejamento", layer:"expansao", depends:["HUGO"], feeds:[] }
+];
+
+const LAYERS = {
+    coleta:{ label:"Coleta", color:"#6366F1" },
+    analise:{ label:"Análise", color:"#10B981" },
+    operacao:{ label:"Operação", color:"#F59E0B" },
+    estrategia:{ label:"Estratégia", color:"#DE2165" },
+    expansao:{ label:"Expansão", color:"#8B5CF6" }
+};
+
+const REPORTS = [
+    { title:"JERÔNIMO — Daily Sales", desc:"Resumo executivo diário: GMV, pedidos, top campanhas e top creators. Gerado automaticamente após cada coleta.", icon:"⚡", agent:"JERÔNIMO", tags:[{t:"Diário",c:""},{t:"Automático",c:"g"},{t:"Executivo",c:"b"}], color:"#10B981" },
+    { title:"CHICO — Weekly AM Report", desc:"Performance semanal individual de cada Account Manager do TAP. 9 relatórios separados com KPIs detalhados.", icon:"📋", agent:"CHICO", tags:[{t:"Semanal",c:""},{t:"Por AM",c:"y"},{t:"TAP",c:"b"}], color:"#6366F1" },
+    { title:"Ranking Top Campanhas", desc:"Ranking das campanhas TAP ordenadas por GMV, com métricas de conversão, ticket médio e crescimento.", icon:"🏆", agent:"SEBASTIÃO", tags:[{t:"Sob demanda",c:""},{t:"TAP",c:"b"},{t:"GMV",c:"g"}], color:"#DE2165" },
+    { title:"Top Creators Performance", desc:"Os 50 creators com melhor performance: GMV, pedidos, itens vendidos e taxa de conversão.", icon:"⭐", agent:"SEBASTIÃO", tags:[{t:"Sob demanda",c:""},{t:"CAP",c:"y"},{t:"Performance",c:"g"}], color:"#F59E0B" },
+    { title:"Alerta de Expiração", desc:"Lista de creators com conexão expirando nos próximos 15 dias. Priorizado por GMV em risco.", icon:"⏰", agent:"OSVALDO", tags:[{t:"Diário 3am",c:""},{t:"Urgente",c:""},{t:"Conexões",c:"y"}], color:"#EF4444" },
+    { title:"Panorama Cross 360°", desc:"Visão consolidada cruzando TAP + CAP + Outreach. O relatório mais completo para decisão estratégica.", icon:"🎯", agent:"JOAQUIM", tags:[{t:"Semanal",c:""},{t:"Estratégico",c:"b"},{t:"Cross",c:"g"}], color:"#8B5CF6" },
+    { title:"Pipeline Prospecção", desc:"Status de prospecção de marcas: leads identificados, contatos realizados, conversões em negociação.", icon:"🔍", agent:"GERALDO", tags:[{t:"Planejado",c:""},{t:"Comercial",c:"y"}], color:"#6B7280" },
+    { title:"Progresso de Creators", desc:"Acompanhamento da jornada do creator nas campanhas: onboarding, primeiro vídeo, primeira venda, top performer.", icon:"📈", agent:"VALDIR", tags:[{t:"Diário",c:""},{t:"CAP",c:"y"},{t:"Jornada",c:"g"}], color:"#F59E0B" }
+];
+
+const BLUEPRINT = [
+    { section:"Hierarquia TAP", icon:"🏷️", cards:[
+        { ic:"👩‍💼", t:"Time Carol", s:"Carolina Mello — Head TAP" },
+        { ic:"👩‍💼", t:"Time Aline", s:"Aline Ferreira — Account Manager" },
+        { ic:"👩‍💼", t:"Time Mirela", s:"Mirela Caberlon — Account Manager" },
+        { ic:"👤", t:"Victoria", s:"Account Manager" },
+        { ic:"👤", t:"Duda", s:"Account Manager" },
+        { ic:"👤", t:"Vinicius", s:"Account Manager" },
+        { ic:"👤", t:"Carol Goulart", s:"Account Manager" },
+        { ic:"👤", t:"Gabriella", s:"Account Manager" },
+        { ic:"👤", t:"Fabi", s:"Account Manager" }
+    ]},
+    { section:"Hierarquia CAP", icon:"🎬", cards:[
+        { ic:"👩‍💼", t:"Tamara Nóbrega", s:"Gerente de Operação" },
+        { ic:"👩‍💼", t:"Valesca Dias", s:"Coordenadora do CAP" },
+        { ic:"👥", t:"Creator Managers", s:"Time de gestão de creators" }
+    ]},
+    { section:"Stack Técnico", icon:"⚙️", cards:[
+        { ic:"📦", t:"Data Pipeline", s:"Custom Report XLSX → Python → JSON → HTML" },
+        { ic:"🤖", t:"13 Agentes IA", s:"Automação via Claude scheduled tasks" },
+        { ic:"📊", t:"4 Dashboards", s:"Executivo · TAP · CAP · Hub" },
+        { ic:"🔗", t:"Reacher", s:"Prospecção e conexão automatizada" },
+        { ic:"📋", t:"Google Sheets", s:"Farol TAP — source of truth operacional" }
+    ]},
+    { section:"Fontes de Dados", icon:"📡", cards:[
+        { ic:"🎵", t:"TikTok Partner Center", s:"Custom Reports TAP (Campaign) + MCN (Creator)" },
+        { ic:"📊", t:"Farol TAP (Sheets)", s:"Tracking operacional dos AMs" },
+        { ic:"🔗", t:"Reacher API", s:"Prospecção e binding de creators" },
+        { ic:"📁", t:"COMU Data Lake", s:"JSONs processados em comu-data/" }
+    ]}
+];
+
+// ===== NAVIGATION =====
+function hideAll(){
+    document.getElementById('homeView').classList.remove('vis');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('vis'));
+    const f=document.getElementById('contentFrame');f.style.display='none';f.src='';
+}
+
+// Listen for messages from iframe dashboards (e.g. "Voltar" button)
+window.addEventListener('message', function(e){
+    if(e.data==='goHome' || (e.data && e.data.type==='comu-nav' && e.data.target==='hub')){
+        go('home',document.getElementById('nav-home'));
+    }
+});
+
+function go(page,el){
+    document.querySelectorAll('.ni').forEach(n=>n.classList.remove('a'));
+    if(el)el.classList.add('a');
+    hideAll();
+    if(page==='home'){document.getElementById('homeView').classList.add('vis');}
+    else{const f=document.getElementById('contentFrame');f.style.display='block';f.src=page;f.onload=()=>{f.contentWindow.postMessage({type:'comu-theme',dark:isDark},'*');}}
+}
+
+function goView(id,el){
+    document.querySelectorAll('.ni').forEach(n=>n.classList.remove('a'));
+    if(el)el.classList.add('a');
+    hideAll();
+    document.getElementById(id).classList.add('vis');
+    if(id==='agentMap'){renderGrid();renderList();renderMindMap();renderFlow();}
+    if(id==='reportsView')renderReports();
+    if(id==='blueprintView')renderBlueprint();
+}
+
+function showDetail(idx){
+    const a=AGENTS[idx];
+    hideAll();
+    document.querySelectorAll('.ni').forEach(n=>n.classList.remove('a'));
+    document.getElementById('nav-agents').classList.add('a');
+    const sc=a.status==='ATIVO'?'at':a.status==='PARCIAL'?'pa':'pl';
+    const lc=LAYERS[a.layer]||{label:a.layer,color:'#888'};
+    let dep='';
+    if(a.depends.length||a.feeds.length){
+        dep='<div style="margin-top:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Dependências & Downstream</div><div class="dep-flow">';
+        a.depends.forEach(d=>{const di=AGENTS.findIndex(x=>x.name===d);dep+=`<div class="dep-node up" onclick="showDetail(${di})">${AGENTS[di].icon} ${d}</div><span class="dep-arr">→</span>`;});
+        dep+=`<div class="dep-node self">${a.icon} ${a.name}</div>`;
+        a.feeds.forEach(f=>{const fi=AGENTS.findIndex(x=>x.name===f);dep+=`<span class="dep-arr">→</span><div class="dep-node dn" onclick="showDetail(${fi})">${AGENTS[fi].icon} ${f}</div>`;});
+        dep+='</div></div>';
+    }
+    const d=document.getElementById('agentDetail');
+    d.innerHTML=`
+        <div class="det-hdr">
+            <div class="det-back" onclick="goView('agentMap',document.getElementById('nav-agents'))">← Voltar ao Mapa</div>
+            <div class="det-top">
+                <div class="det-av ${sc}">${a.icon}</div>
+                <div>
+                    <div class="det-nm">${a.name}</div>
+                    <div class="det-rl">${a.role}</div>
+                    <div style="margin-top:5px">
+                        <span class="ag-st ${sc}"><span class="dot ${sc==='at'?'dg':sc==='pa'?'dy':'dgr'}"></span> ${a.status}</span>
+                        <span style="margin-left:6px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:16px;background:${lc.color}15;color:${lc.color};border:1px solid ${lc.color}25">${lc.label}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="det-body">
+            <div class="det-desc">${a.description}</div>
+            <div class="det-cards">
+                <div class="det-c"><div class="det-cl">⏱ Schedule</div><div class="det-cv">${a.schedule}</div></div>
+                <div class="det-c"><div class="det-cl">🕐 Última Execução</div><div class="det-cv">${a.lastRun}</div></div>
+                <div class="det-c"><div class="det-cl">📥 Inputs</div><div class="det-cv">${a.inputs}</div></div>
+                <div class="det-c"><div class="det-cl">📤 Outputs</div><div class="det-cv">${a.outputs}</div></div>
+                <div class="det-c"><div class="det-cl">⚙️ Scripts</div><div class="det-cv">${a.scripts}</div></div>
+                <div class="det-c"><div class="det-cl">📊 Métricas</div><div class="det-cv">${a.metrics}</div></div>
+            </div>
+            ${dep}
+        </div>`;
+    d.classList.add('vis');
+}
+
+// ===== GRID =====
+function renderGrid(){
+    document.getElementById('agGrid').innerHTML=AGENTS.map((a,i)=>{
+        const sc=a.status==='ATIVO'?'at':a.status==='PARCIAL'?'pa':'pl';
+        return `<div class="ag-card ${sc}" onclick="showDetail(${i})">
+            <div class="ag-top"><div class="ag-ic ${sc}">${a.icon}</div><div>
+                <div class="ag-nm">${a.name}</div><div class="ag-rl">${a.role}</div>
+                <div class="ag-st ${sc}"><span class="dot ${sc==='at'?'dg':sc==='pa'?'dy':'dgr'} ${sc==='at'?'dp':''}"></span> ${a.status}</div>
+            </div></div>
+            <div class="ag-desc">${a.description}</div>
+            <div class="ag-meta"><div class="ag-mi">⏱ <strong>${a.schedule}</strong></div><div class="ag-mi">🕐 ${a.lastRun}</div></div>
+        </div>`;
+    }).join('');
+}
+
+// ===== LIST =====
+function renderList(){
+    document.getElementById('agLB').innerHTML=AGENTS.map((a,i)=>{
+        const sc=a.status==='ATIVO'?'at':a.status==='PARCIAL'?'pa':'pl';
+        const bg=sc==='at'?'rgba(16,185,129,0.08)':sc==='pa'?'rgba(245,158,11,0.08)':'rgba(107,114,128,0.06)';
+        return `<tr onclick="showDetail(${i})">
+            <td><div class="alt-nm"><div class="alt-ic" style="background:${bg}">${a.icon}</div><div class="alt-t">${a.name}</div></div></td>
+            <td>${a.role}</td>
+            <td><span class="ag-st ${sc}"><span class="dot ${sc==='at'?'dg':sc==='pa'?'dy':'dgr'}"></span> ${a.status}</span></td>
+            <td style="font-size:11px">${a.schedule}</td>
+            <td style="font-size:11px">${a.lastRun}</td>
+            <td style="font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.metrics}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ===== FLOW =====
+function renderFlow(){
+    const layers=[
+        {key:'coleta',agents:AGENTS.filter(a=>a.layer==='coleta')},
+        {key:'analise',agents:AGENTS.filter(a=>a.layer==='analise')},
+        {key:'operacao',agents:AGENTS.filter(a=>a.layer==='operacao')},
+        {key:'estrategia',agents:AGENTS.filter(a=>a.layer==='estrategia')},
+        {key:'expansao',agents:AGENTS.filter(a=>a.layer==='expansao')}
+    ].filter(l=>l.agents.length);
+    document.getElementById('flowDiag').innerHTML=layers.map((l,li)=>{
+        const lc=LAYERS[l.key];
+        const ags=l.agents.map(a=>{const sc=a.status==='ATIVO'?'at':a.status==='PARCIAL'?'pa':'pl';const idx=AGENTS.indexOf(a);
+            return `<div class="flow-ag ${sc}" onclick="showDetail(${idx})">${a.icon} ${a.name}</div>`;}).join('');
+        const arr=li<layers.length-1?'<div class="flow-arr">→</div>':'';
+        return `<div class="flow-col"><div class="flow-lbl" style="color:${lc.color}">${lc.label}</div>${ags}</div>${arr}`;
+    }).join('');
+}
+
+// ===== MIND MAP =====
+function renderMindMap(){
+    const container=document.getElementById('agMind');
+    const W=container.offsetWidth||900;
+    const H=520;
+    // Position agents in a radial layout by layer
+    const positions=[{x:W*0.50,y:50},{x:W*0.25,y:50},{x:W*0.75,y:50},{x:W*0.25,y:175},{x:W*0.75,y:175},{x:W*0.10,y:310},{x:W*0.28,y:310},{x:W*0.50,y:310},{x:W*0.72,y:310},{x:W*0.90,y:310},{x:W*0.50,y:455},{x:W*0.20,y:455},{x:W*0.80,y:455}];
+    // Build SVG connections
+    let svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+    svg+='<defs><marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#DE216580"/></marker></defs>';
+    AGENTS.forEach((a,i)=>{
+        a.feeds.forEach(fname=>{
+            const fi=AGENTS.findIndex(x=>x.name===fname);
+            if(fi>=0){
+                const x1=positions[i].x, y1=positions[i].y+28;
+                const x2=positions[fi].x, y2=positions[fi].y-28;
+                svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(222,33,101,0.15)" stroke-width="2" marker-end="url(#ah)"/>`;
+            }
+        });
+    });
+    svg+='</svg>';
+    // Build nodes
+    let nodes='';
+    AGENTS.forEach((a,i)=>{
+        const sc=a.status==='ATIVO'?'at':a.status==='PARCIAL'?'pa':'pl';
+        const x=positions[i].x-28;
+        const y=positions[i].y-28;
+        nodes+=`<div class="mm-node" style="left:${x}px;top:${y}px" onclick="showDetail(${i})">
+            <div class="mm-bubble ${sc}">${a.icon}</div>
+            <div class="mm-name">${a.name}</div>
+            <div class="mm-role">${a.role}</div>
+        </div>`;
+    });
+    // Layer labels
+    const layerLabels=[
+        {label:'COLETA',y:50,color:'#6366F1'},
+        {label:'ANÁLISE',y:160,color:'#10B981'},
+        {label:'OPERAÇÃO',y:300,color:'#F59E0B'},
+        {label:'ESTRATÉGIA',y:440,color:'#DE2165'}
+    ];
+    let labels='';
+    layerLabels.forEach(l=>{
+        labels+=`<div class="mm-layer" style="left:8px;top:${l.y}px;color:${l.color}">${l.label}</div>`;
+    });
+    container.innerHTML=svg+nodes+labels;
+}
+
+// ===== VIEW TOGGLE =====
+function swView(v,btn){
+    document.querySelectorAll('.vtog-b').forEach(b=>b.classList.remove('a'));btn.classList.add('a');
+    const g=document.getElementById('agGrid'),l=document.getElementById('agList'),m=document.getElementById('agMind');
+    g.className='ag-grid';l.className='ag-list';m.className='ag-mind';
+    if(v==='grid')g.className='ag-grid vis';
+    else if(v==='list')l.className='ag-list vis';
+    else if(v==='mind'){m.className='ag-mind vis';renderMindMap();}
+}
+
+// ===== REPORTS =====
+function renderReports(){
+    document.getElementById('rptGrid').innerHTML=REPORTS.map((r,i)=>{
+        const tags=r.tags.map(t=>`<span class="rpt-tag ${t.c}">${t.t}</span>`).join('');
+        return `<div class="rpt-card" onclick="alert('Template: ${r.title}\\n\\nGerado pelo agente ${r.agent}.\\n\\nEste relatório será disparado automaticamente conforme o schedule do agente.')" style="cursor:pointer">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${r.color}"></div>
+            <div class="rpt-ic">${r.icon}</div>
+            <div class="rpt-t">${r.title}</div>
+            <div class="rpt-s">${r.desc}</div>
+            <div class="rpt-tags">${tags}</div>
+        </div>`;
+    }).join('');
+}
+
+// ===== BLUEPRINT =====
+function renderBlueprint(){
+    document.getElementById('bpBody').innerHTML=BLUEPRINT.map(s=>{
+        const cards=s.cards.map(c=>`<div class="bp-card"><div class="bp-card-ic">${c.ic}</div><div class="bp-card-t">${c.t}</div><div class="bp-card-s">${c.s}</div></div>`).join('');
+        return `<div class="bp-section"><div class="bp-section-t">${s.icon} ${s.section}</div><div class="bp-cards">${cards}</div></div>`;
+    }).join('');
+}
+
+// ===== THEME =====
+function toggleTheme(){
+    isDark=!isDark;document.body.classList.toggle('dark',isDark);
+    document.getElementById('thI').textContent=isDark?'☀️':'🌙';
+    document.getElementById('thL').textContent=isDark?'Light':'Dark';
+    const f=document.getElementById('contentFrame');
+    if(f.contentWindow)f.contentWindow.postMessage({type:'comu-theme',dark:isDark},'*');
+}
+
+function toggleSidebar(){
+    const sb=document.getElementById('sidebar');
+    const c=sb.style.width==='60px';
+    sb.style.width=c?'var(--sidebar-w)':'60px';
+    sb.style.minWidth=c?'var(--sidebar-w)':'60px';
+    document.getElementById('sbI').textContent=c?'◀':'▶';
+    sb.querySelectorAll('.st,.sb-brand-sub,.sb-brand-name,span:not(.ni-i):not(.dot)').forEach(el=>{
+        if(!c&&!el.classList.contains('ni-i')&&!el.classList.contains('dot')&&el.parentElement.classList.contains('ni-r'))el.style.display='none';
+    });
+}
+
+// ===== SHORTCUTS =====
+document.addEventListener('keydown',e=>{
+    if(e.altKey&&e.key==='1')go('comu-dashboard-executivo.html',document.querySelectorAll('.ni')[1]);
+    if(e.altKey&&e.key==='2')go('comu-dashboard-funil.html',document.querySelectorAll('.ni')[2]);
+    if(e.altKey&&e.key==='3')go('comu-dashboard-tap.html',document.querySelectorAll('.ni')[3]);
+    if(e.altKey&&e.key==='4')go('comu-dashboard-cap.html',document.querySelectorAll('.ni')[4]);
+    if(e.altKey&&e.key==='5')go('comu-dashboard-comercial.html',document.querySelectorAll('.ni')[5]);
+    if(e.altKey&&e.key==='6')go('comu-dashboard-gestao-ams.html',document.querySelectorAll('.ni')[6]);
+    if(e.altKey&&e.key==='7')go('comu-dashboard-automacao.html',document.querySelectorAll('.ni')[7]);
+    if(e.altKey&&e.key==='8')go('comu-dashboard-automacao.html',document.querySelectorAll('.ni')[8]);
+    if(e.altKey&&e.key==='r')goView('reportsView',document.getElementById('nav-rpt'));
+    if(e.altKey&&e.key==='b')goView('blueprintView',document.getElementById('nav-bp'));
+    if(e.altKey&&e.key==='0')go('home',document.getElementById('nav-home'));
+    if(e.altKey&&e.key==='d')toggleTheme();
+});
+</script>
+<!-- PWA Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => {
+        console.log('[COMU Hub] PWA Service Worker registrado:', reg.scope);
+        // Verifica atualizações a cada 60 min
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+        // Quando nova versão disponível, atualiza
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'activated') {
+              console.log('[COMU Hub] Nova versão do Hub disponível');
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[COMU Hub] SW falhou:', err));
+  });
+}
+
+// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Mostra botão de instalar no footer da sidebar
+  const installBtn = document.createElement('button');
+  installBtn.className = 'fb';
+  installBtn.innerHTML = '📲 Instalar App';
+  installBtn.style.background = 'rgba(222,33,101,0.15)';
+  installBtn.style.color = '#DE2165';
+  installBtn.style.fontWeight = '600';
+  installBtn.onclick = async () => {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      installBtn.remove();
+    }
+    deferredPrompt = null;
+  };
+  const footer = document.querySelector('.sb-ft');
+  if (footer) footer.prepend(installBtn);
+});
+</script>
+</body>
+</html>
 C
 COMU
 COMMAND CENTER
