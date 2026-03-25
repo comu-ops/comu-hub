@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMU - AM Management Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #DE2165;
+            --dark: #1D2035;
+            --light-bg: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-dark: #1D2035;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --scale-plus: #8B5CF6;
+            --scale: #06B6D4;
+            --growth: #F97316;
+            --gray-100: #F1F5F9;
+            --gray-200: #E2E8F0;
+            --gray-300: #CBD5E1;
+            --gray-600: #475569;
+        }
+
+        body.dark-mode {
+            --light-bg: #0F172A;
+            --card-bg: #1E293B;
+            --text-dark: #F1F5F9;
+            --text-light: #94A3B8;
+            --border: #334155;
+            --gray-100: #1E293B;
+            --gray-200: #334155;
+            --gray-300: #475569;
+            --gray-600: #CBD5E1;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .clock {
+            font-size: 0.875rem;
+            opacity: 0.95;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: var(--card-bg);
+            border-bottom: 2px solid var(--border);
+            padding: 0 2rem;
+            flex-shrink: 0;
+            gap: 0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .alert-badge {
+            background: var(--danger);
+            color: white;
+            border-radius: 12px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(222, 33, 101, 0.1);
+        }
+
+        .kpi-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .kpi-subtext {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* AM Ranking Table */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .table-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--gray-100);
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        tbody tr:hover {
+            background: var(--gray-100);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .level-scale-plus {
+            color: var(--scale-plus);
+            font-weight: 600;
+        }
+
+        .level-scale {
+            color: var(--scale);
+            font-weight: 600;
+        }
+
+        .level-growth {
+            color: var(--growth);
+            font-weight: 600;
+        }
+
+        /* Portfolio Tab */
+        .search-container {
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(222, 33, 101, 0.1);
+        }
+
+        .am-accordion {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .am-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .am-header:hover {
+            background: var(--gray-100);
+        }
+
+        .am-header.active {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%));
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .am-header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .am-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .am-header.active .am-avatar {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .am-info {
+            flex: 1;
+        }
+
+        .am-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .am-meta {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .am-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .am-header.active .am-toggle {
+            transform: rotate(180deg);
+        }
+
+        .am-content {
+            display: none;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .am-content.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .am-brands-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .am-brands-table thead {
+            background: var(--gray-100);
+        }
+
+        .am-brands-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .am-brands-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .am-brands-table tbody tr:hover {
+            background: var(--gray-100);
+        }
+
+        .brand-name {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .status-pipeline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-full-auto {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-collector-tap {
+            background: #DBEAFE;
+            color: #0C4A6E;
+        }
+
+        .status-no-tap {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        /* Alerts Tab */
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .alert-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .alert-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .alert-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .alert-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border-left: 3px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-item.critical {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--danger);
+            color: #991B1B;
+        }
+
+        .alert-item.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left-color: var(--warning);
+            color: #92400E;
+        }
+
+        .alert-item.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success);
+            color: #065F46;
+        }
+
+        .alert-action {
+            background: var(--primary);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .alert-action:hover {
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                padding: 0 1rem;
+            }
+
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .am-header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .am-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .am-toggle {
+                align-self: flex-end;
+            }
+
+            .alerts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar Styling */
+        .content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 4px;
+        }
+
+        .content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div>
+                    <div class="header-title">AM Management Panel</div>
+                    <div class="header-subtitle">Gerenciamento de Gestores de Conta TAP</div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="clock" id="clock">00:00:00</div>
+                <button class="btn-icon" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+                <button class="btn-back" onclick="goHome()">← Voltar</button>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(0)">
+                📊 Visão Geral
+            </button>
+            <button class="tab-btn" onclick="switchTab(1)">
+                📋 Portfólio por AM
+            </button>
+            <button class="tab-btn" onclick="switchTab(2)">
+                🚨 Alertas por AM
+                <span class="alert-badge" id="alertBadge">7</span>
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Tab 1: Visão Geral -->
+            <div class="tab-content active" id="tab0">
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total de AMs</div>
+                        <div class="kpi-value">9</div>
+                        <div class="kpi-subtext">Gestores ativos</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total de Marcas</div>
+                        <div class="kpi-value">114</div>
+                        <div class="kpi-subtext">90 com TAP, 24 sem</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">GMV TAP Total</div>
+                        <div class="kpi-value">R$2.9M</div>
+                        <div class="kpi-subtext">Últimos 28 dias</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Gap Oportunidade</div>
+                        <div class="kpi-value">R$50.8M</div>
+                        <div class="kpi-subtext">Potencial TAP</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Creators TAP</div>
+                        <div class="kpi-value">8,378</div>
+                        <div class="kpi-subtext">Colaborando ativamente</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Campanhas Ativas</div>
+                        <div class="kpi-value">351</div>
+                        <div class="kpi-subtext">Em execução</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title">Marcas por AM</div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart1"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Status Pipeline</div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart2"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AM Destaque -->
+                <div id="destaqueAM" style="background:linear-gradient(135deg,var(--primary) 0%,#8B1A4A 100%);border-radius:16px;padding:28px 32px;margin-bottom:24px;color:white;display:flex;align-items:center;gap:28px;box-shadow:0 8px 32px rgba(222,33,101,0.3)">
+                    <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;border:3px solid rgba(255,255,255,0.4);flex-shrink:0">🏆</div>
+                    <div style="flex:1">
+                        <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:1.5px;opacity:0.85;margin-bottom:4px">AM em Destaque — Março 2026</div>
+                        <div class="destaque-name" style="font-size:1.8rem;font-weight:800;margin-bottom:4px">Victória</div>
+                        <div class="destaque-desc" style="font-size:0.95rem;opacity:0.9">Maior GMV TAP no mês com R$ 945K · 18 marcas</div>
+                    </div>
+                    <div style="display:flex;gap:24px;flex-shrink:0">
+                        <div style="text-align:center"><div class="destaque-gmv" style="font-size:1.6rem;font-weight:800">R$945K</div><div style="font-size:0.7rem;opacity:0.8;text-transform:uppercase">GMV TAP</div></div>
+                        <div style="text-align:center"><div class="destaque-orders" style="font-size:1.6rem;font-weight:800">4.2K</div><div style="font-size:0.7rem;opacity:0.8;text-transform:uppercase">Pedidos</div></div>
+                        <div style="text-align:center"><div class="destaque-trend" style="font-size:1.6rem;font-weight:800">↑23%</div><div style="font-size:0.7rem;opacity:0.8;text-transform:uppercase">vs Mês Ant.</div></div>
+                    </div>
+                </div>
+
+                <!-- Ranking de Vendas por AM -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>🏅 Ranking de Vendas por AM</h3>
+                        <span style="font-size:0.8rem;color:var(--text-light)">Ordenado por GMV TAP · Últimos 28 dias</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:40px">#</th>
+                                <th>AM</th>
+                                <th>Marcas</th>
+                                <th style="text-align:right">GMV TAP</th>
+                                <th style="text-align:right">Pedidos</th>
+                                <th style="text-align:right">Creators c/ Venda</th>
+                                <th style="text-align:right">Conversão TAP</th>
+                                <th style="text-align:center">Tendência</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Portfólio por AM -->
+            <div class="tab-content" id="tab1">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar marca ou AM...">
+                </div>
+
+                <div class="am-accordion" id="amAccordion"></div>
+            </div>
+
+            <!-- Tab 3: Alertas por AM -->
+            <div class="tab-content" id="tab2">
+                <div class="alerts-grid" id="alertsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        const amsData = [
+            {
+                id: 1,
+                name: 'Mirela',
+                brands: 19,
+                level: 'Scale+',
+                status: 'active',
+                brands_list: [
+                    { name: 'Dot', emoji: '⚡', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Renova Be', emoji: '✨', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Noma Beauty', emoji: '🌺', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Magic Muuh', emoji: '💪', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🎨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 6', emoji: '🌟', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 7', emoji: '💎', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 8', emoji: '🔥', level: 'Growth', tap: 'Collector', status: 'paused' },
+                    { name: 'Brand 9', emoji: '🌈', level: 'Scale', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 10', emoji: '🎯', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 11', emoji: '✨', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 12', emoji: '🌸', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 13', emoji: '🎪', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 14', emoji: '🏆', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 15', emoji: '🎭', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 16', emoji: '🌺', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 17', emoji: '💄', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 18', emoji: '🎀', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 19', emoji: '🌷', level: 'Scale', tap: 'No-TAP', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'critical', text: '5 creators não converteram em 3 dias', action: 'Follow-up' }
+                ]
+            },
+            {
+                id: 2,
+                name: 'Victória',
+                brands: 18,
+                level: 'Scale',
+                status: 'active',
+                brands_list: [
+                    { name: 'Nanovit Nutrition', emoji: '💊', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Barbours', emoji: '💈', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Gummy', emoji: '🍬', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 4', emoji: '🎯', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🌟', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 6', emoji: '💫', level: 'Growth', tap: 'Collector', status: 'paused' },
+                    { name: 'Brand 7', emoji: '🎨', level: 'Scale', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 8', emoji: '🔮', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 9', emoji: '🌈', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 10', emoji: '✨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 11', emoji: '🎭', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 12', emoji: '🌸', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 13', emoji: '💎', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 14', emoji: '🏆', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 15', emoji: '🎪', level: 'Growth', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 16', emoji: '🌺', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 17', emoji: '💄', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 18', emoji: '🎀', level: 'Scale', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'critical', text: '8 creators não converteram (Barbours)', action: 'Follow-up' },
+                    { type: 'warning', text: 'GMV caiu 12% vs semana passada', action: 'Análise' }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Carol',
+                brands: 14,
+                level: 'Scale',
+                status: 'active',
+                brands_list: [
+                    { name: 'Amend', emoji: '💆', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Sallve', emoji: '🧴', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Embelleze', emoji: '💅', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 4', emoji: '✨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🌟', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 6', emoji: '💫', level: 'Growth', tap: 'Collector', status: 'paused' },
+                    { name: 'Brand 7', emoji: '🎨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 8', emoji: '🔮', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 9', emoji: '🌈', level: 'Growth', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 10', emoji: '💎', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 11', emoji: '🏆', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 12', emoji: '🌸', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 13', emoji: '🎭', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 14', emoji: '🎪', level: 'Growth', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'success', text: 'Todas as marcas em dia', action: 'OK' }
+                ]
+            },
+            {
+                id: 4,
+                name: 'Aline',
+                brands: 13,
+                level: 'Scale',
+                status: 'active',
+                brands_list: [
+                    { name: 'Guday', emoji: '🌿', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Gocase', emoji: '👜', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Pink Cheeks', emoji: '🌸', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Rituária', emoji: '✨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Kokeshi', emoji: '🎎', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Barbours', emoji: '💈', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Spoiler', emoji: '🎬', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Cicatribem', emoji: '🏥', level: 'Growth', tap: 'No-TAP', status: 'active' },
+                    { name: 'Little Joe', emoji: '👶', level: 'Growth', tap: 'No-TAP', status: 'paused' },
+                    { name: 'LuxeGlow', emoji: '💎', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'VelvetSkin', emoji: '🧴', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Lescent', emoji: '🌟', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Ápice', emoji: '⛰️', level: 'Growth', tap: 'No-TAP', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'success', text: '2 campanhas iniciando amanhã', action: 'OK' }
+                ]
+            },
+            {
+                id: 5,
+                name: 'Carol Goulart',
+                brands: 13,
+                level: 'Scale+',
+                status: 'active',
+                brands_list: [
+                    { name: 'Iszi Cosméticos', emoji: '💄', level: 'Scale', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Zaya Beauty', emoji: '✨', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Vera Valle', emoji: '🌺', level: 'Scale', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 4', emoji: '🎯', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🌟', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 6', emoji: '💫', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 7', emoji: '🎨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 8', emoji: '🔮', level: 'Growth', tap: 'Collector', status: 'paused' },
+                    { name: 'Brand 9', emoji: '🌈', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 10', emoji: '✨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 11', emoji: '🎭', level: 'Scale', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 12', emoji: '🌸', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 13', emoji: '💎', level: 'Scale+', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'critical', text: '29 creators não converteram (Renova Be)', action: 'Urgente' }
+                ]
+            },
+            {
+                id: 6,
+                name: 'Vinicius',
+                brands: 11,
+                level: 'Scale',
+                status: 'active',
+                brands_list: [
+                    { name: 'Brand 1', emoji: '🎯', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 2', emoji: '🌟', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 3', emoji: '💫', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 4', emoji: '🎨', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🔮', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 6', emoji: '🌈', level: 'Scale', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 7', emoji: '✨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 8', emoji: '🎭', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 9', emoji: '🌸', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 10', emoji: '💎', level: 'Growth', tap: 'Collector', status: 'paused' },
+                    { name: 'Brand 11', emoji: '🏆', level: 'Scale', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'success', text: 'Performance em alta', action: 'OK' }
+                ]
+            },
+            {
+                id: 7,
+                name: 'Duda',
+                brands: 10,
+                level: 'Growth',
+                status: 'warning',
+                brands_list: [
+                    { name: 'Brand 1', emoji: '🎯', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 2', emoji: '🌟', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 3', emoji: '💫', level: 'Growth', tap: 'No-TAP', status: 'paused' },
+                    { name: 'Brand 4', emoji: '🎨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🔮', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 6', emoji: '🌈', level: 'Growth', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 7', emoji: '✨', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 8', emoji: '🎭', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 9', emoji: '🌸', level: 'Growth', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 10', emoji: '💎', level: 'Growth', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'warning', text: '4 amostras pendentes de aprovação', action: 'Revisar' }
+                ]
+            },
+            {
+                id: 8,
+                name: 'Gabriella',
+                brands: 10,
+                level: 'Scale',
+                status: 'active',
+                brands_list: [
+                    { name: 'BRK-Belkit NEW HAIR', emoji: '💇', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 2', emoji: '🌟', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 3', emoji: '💫', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 4', emoji: '🎨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🔮', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 6', emoji: '🌈', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 7', emoji: '✨', level: 'Growth', tap: 'No-TAP', status: 'active' },
+                    { name: 'Brand 8', emoji: '🎭', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 9', emoji: '🌸', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 10', emoji: '💎', level: 'Scale', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'success', text: '1 parceria expirando em 5 dias', action: 'Renovar' }
+                ]
+            },
+            {
+                id: 9,
+                name: 'Fabi',
+                brands: 5,
+                level: 'Scale+',
+                status: 'active',
+                brands_list: [
+                    { name: 'Esbelt', emoji: '⚡', level: 'Scale+', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Zalia', emoji: '💎', level: 'Scale', tap: 'Full-Auto', status: 'active' },
+                    { name: 'Brand 3', emoji: '🌟', level: 'Scale+', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 4', emoji: '✨', level: 'Scale', tap: 'Collector', status: 'active' },
+                    { name: 'Brand 5', emoji: '🎯', level: 'Scale', tap: 'Collector', status: 'active' }
+                ],
+                alerts: [
+                    { type: 'success', text: 'Todas as campanhas no alvo', action: 'OK' }
+                ]
+            }
+        ];
+
+        // AM Sales Ranking Data (sorted by GMV TAP)
+        const amRankingData = [
+            { name: 'Victória', brands: 18, gmv: 945200, orders: 4200, creatorsVenda: 312, conversao: 14.8, trend: 23, color: '#DE2165' },
+            { name: 'Mirela', brands: 19, gmv: 680400, orders: 3100, creatorsVenda: 245, conversao: 11.2, trend: 12, color: '#8B5CF6' },
+            { name: 'Carol Goulart', brands: 13, gmv: 420800, orders: 2800, creatorsVenda: 198, conversao: 9.7, trend: 18, color: '#06B6D4' },
+            { name: 'Carol', brands: 14, gmv: 310500, orders: 1950, creatorsVenda: 156, conversao: 8.3, trend: 5, color: '#F97316' },
+            { name: 'Aline', brands: 13, gmv: 275300, orders: 1720, creatorsVenda: 134, conversao: 7.6, trend: -3, color: '#10B981' },
+            { name: 'Vinicius', brands: 11, gmv: 198700, orders: 1340, creatorsVenda: 108, conversao: 6.9, trend: 8, color: '#F59E0B' },
+            { name: 'Gabriella', brands: 10, gmv: 152400, orders: 980, creatorsVenda: 87, conversao: 5.4, trend: 15, color: '#EC4899' },
+            { name: 'Duda', brands: 10, gmv: 118600, orders: 760, creatorsVenda: 65, conversao: 4.8, trend: -7, color: '#0EA5E9' },
+            { name: 'Fabi', brands: 5, gmv: 68200, orders: 420, creatorsVenda: 38, conversao: 3.2, trend: 2, color: '#84CC16' }
+        ];
+
+        let chartInstances = {};
+
+        // Render AM Sales Ranking
+        function renderRanking() {
+            const tbody = document.getElementById('rankingBody');
+            const maxGMV = amRankingData[0].gmv;
+
+            // Update destaque banner dynamically
+            const top = amRankingData[0];
+            const destaqueEl = document.getElementById('destaqueAM');
+            if (destaqueEl) {
+                destaqueEl.querySelector('.destaque-name').textContent = top.name;
+                destaqueEl.querySelector('.destaque-desc').textContent = `Maior GMV TAP no mês com R$ ${(top.gmv/1000).toFixed(0)}K · ${top.brands} marcas`;
+                destaqueEl.querySelector('.destaque-gmv').textContent = `R$${(top.gmv/1000).toFixed(0)}K`;
+                destaqueEl.querySelector('.destaque-orders').textContent = (top.orders/1000).toFixed(1) + 'K';
+                destaqueEl.querySelector('.destaque-trend').textContent = `↑${top.trend}%`;
+            }
+
+            tbody.innerHTML = amRankingData.map((am, i) => {
+                const pos = i + 1;
+                const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `<span style="color:var(--text-light);font-weight:600">${pos}</span>`;
+                const gmvFormatted = am.gmv >= 1000000
+                    ? `R$ ${(am.gmv/1000000).toFixed(1)}M`
+                    : `R$ ${(am.gmv/1000).toFixed(0)}K`;
+                const ordersFormatted = am.orders >= 1000
+                    ? `${(am.orders/1000).toFixed(1)}K`
+                    : am.orders.toLocaleString('pt-BR');
+                const trendIcon = am.trend >= 0
+                    ? `<span style="color:#10B981;font-weight:700">↑${am.trend}%</span>`
+                    : `<span style="color:#EF4444;font-weight:700">↓${Math.abs(am.trend)}%</span>`;
+                const perfPct = Math.round((am.gmv / maxGMV) * 100);
+                const perfColor = perfPct >= 70 ? '#10B981' : perfPct >= 40 ? '#F59E0B' : '#EF4444';
+
+                return `<tr style="transition:background 0.2s" onmouseover="this.style.background='var(--bg-hover,rgba(222,33,101,0.05))'" onmouseout="this.style.background=''">
+                    <td style="text-align:center;font-size:1.2rem">${medal}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div style="width:36px;height:36px;border-radius:50%;background:${am.color};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">${am.name.charAt(0)}</div>
+                            <div>
+                                <div style="font-weight:700;font-size:0.95rem">${am.name}</div>
+                                ${pos <= 3 ? '<div style="font-size:0.7rem;color:var(--primary);font-weight:600">TOP PERFORMER</div>' : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align:center"><span style="background:var(--bg-secondary);padding:3px 10px;border-radius:12px;font-weight:600;font-size:0.85rem">${am.brands}</span></td>
+                    <td style="text-align:right;font-weight:800;color:${pos <= 3 ? 'var(--primary)' : 'var(--text)'};font-size:0.95rem">${gmvFormatted}</td>
+                    <td style="text-align:right;font-weight:600">${ordersFormatted}</td>
+                    <td style="text-align:right;font-weight:600">${am.creatorsVenda}</td>
+                    <td style="text-align:right"><span style="background:${am.conversao >= 10 ? 'rgba(16,185,129,0.12)' : am.conversao >= 6 ? 'rgba(249,115,22,0.12)' : 'rgba(239,68,68,0.12)'};color:${am.conversao >= 10 ? '#10B981' : am.conversao >= 6 ? '#F97316' : '#EF4444'};padding:3px 10px;border-radius:8px;font-weight:700;font-size:0.85rem">${am.conversao}%</span></td>
+                    <td style="text-align:center">${trendIcon}</td>
+                    <td style="min-width:120px">
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div style="flex:1;height:8px;background:var(--bg-secondary);border-radius:4px;overflow:hidden">
+                                <div style="height:100%;width:${perfPct}%;background:${perfColor};border-radius:4px;transition:width 0.6s ease"></div>
+                            </div>
+                            <span style="font-size:0.75rem;font-weight:700;color:${perfColor};min-width:32px">${perfPct}%</span>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderRanking();
+            renderPortfolioTab();
+            renderAlertsTab();
+            initializeCharts();
+        });
+
+        // Clock in PT-BR
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'America/Sao_Paulo'
+            });
+            document.getElementById('clock').textContent = timeString;
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+
+            // Reinitialize charts with new theme
+            setTimeout(() => {
+                Object.values(chartInstances).forEach(chart => {
+                    if (chart) chart.destroy();
+                });
+                chartInstances = {};
+                initializeCharts();
+            }, 100);
+        }
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Tab switching
+        function switchTab(tabIndex) {
+            document.querySelectorAll('.tab-content').forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === tabIndex);
+            });
+            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === tabIndex);
+            });
+
+            if (tabIndex === 0) {
+                setTimeout(() => {
+                    Object.values(chartInstances).forEach(chart => {
+                        if (chart) chart.resize();
+                    });
+                }, 100);
+            }
+        }
+
+        // Initialize Charts
+        function initializeCharts() {
+            const isDark = document.body.classList.contains('dark-mode');
+            const textColor = isDark ? '#F1F5F9' : '#1D2035';
+            const gridColor = isDark ? '#334155' : '#E2E8F0';
+
+            // Chart 1: Brands per AM (Horizontal Bar)
+            const ctx1 = document.getElementById('chart1').getContext('2d');
+            chartInstances.chart1 = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: amsData.map(am => am.name),
+                    datasets: [{
+                        label: 'Marcas',
+                        data: amsData.map(am => am.brands),
+                        backgroundColor: [
+                            '#DE2165', '#8B5CF6', '#06B6D4', '#F97316', '#10B981',
+                            '#F59E0B', '#EC4899', '#0EA5E9', '#84CC16'
+                        ],
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor },
+                            beginAtZero: true
+                        },
+                        y: {
+                            ticks: { color: textColor },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Pipeline Status (Pie)
+            const ctx2 = document.getElementById('chart2').getContext('2d');
+            chartInstances.chart2 = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Full Auto', 'Collector+TAP', 'Sem TAP'],
+                    datasets: [{
+                        data: [9, 81, 24],
+                        backgroundColor: ['#10B981', '#06B6D4', '#EF4444'],
+                        borderColor: document.body.classList.contains('dark-mode') ? '#1E293B' : '#FFFFFF',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textColor,
+                                padding: 15,
+                                font: { size: 12, weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render Portfolio Tab
+        function renderPortfolioTab() {
+            const accordion = document.getElementById('amAccordion');
+            accordion.innerHTML = amsData.map((am, idx) => {
+                const brandRows = am.brands_list.map(brand => `
+                    <tr>
+                        <td class="brand-name">${brand.emoji} ${brand.name}</td>
+                        <td><span class="level-${brand.level.toLowerCase().replace('+', '-plus')}">${brand.level}</span></td>
+                        <td>${brand.tap === 'Full-Auto' ? '⚡' : brand.tap === 'Collector' ? '📊' : '❌'}</td>
+                        <td><span class="status-pipeline status-${brand.tap.toLowerCase().replace('+', '-plus').replace('-', '-')}">${brand.tap === 'Full-Auto' ? '🟢 Full-Auto' : brand.tap === 'No-TAP' ? '🔴 Sem TAP' : '🟡 Collector'}</span></td>
+                    </tr>
+                `).join('');
+
+                return `
+                    <div>
+                        <div class="am-header" onclick="toggleAM(${idx})">
+                            <div class="am-header-content">
+                                <div class="am-avatar">${am.name.charAt(0)}</div>
+                                <div class="am-info">
+                                    <div class="am-name">${am.name}</div>
+                                    <div class="am-meta">${am.brands} marcas • Nível: ${am.level}</div>
+                                </div>
+                            </div>
+                            <div class="am-toggle">▼</div>
+                        </div>
+                        <div class="am-content">
+                            <table class="am-brands-table">
+                                <thead>
+                                    <tr>
+                                        <th>Marca</th>
+                                        <th>Nível</th>
+                                        <th>TAP</th>
+                                        <th>Status Pipeline</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${brandRows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle AM accordion
+        function toggleAM(idx) {
+            const header = document.querySelectorAll('.am-header')[idx];
+            const content = document.querySelectorAll('.am-content')[idx];
+
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput')?.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.am-content').forEach((content, idx) => {
+                const am = amsData[idx];
+                const amName = am.name.toLowerCase();
+                const brandMatch = am.brands_list.some(b => b.name.toLowerCase().includes(searchTerm));
+
+                if (amName.includes(searchTerm) || brandMatch) {
+                    content.parentElement.style.display = '';
+                } else {
+                    content.parentElement.style.display = 'none';
+                }
+            });
+        });
+
+        // Render Alerts Tab
+        function renderAlertsTab() {
+            const grid = document.getElementById('alertsGrid');
+            let totalAlerts = 0;
+
+            grid.innerHTML = amsData.map(am => {
+                const alertsHTML = am.alerts.map(alert => {
+                    if (alert.type === 'critical') totalAlerts++;
+                    return `
+                        <div class="alert-item ${alert.type}">
+                            <span>${alert.text}</span>
+                            <button class="alert-action">${alert.action}</button>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="alert-card">
+                        <div class="alert-header">
+                            <div class="alert-avatar">${am.name.charAt(0)}</div>
+                            <div>
+                                <div class="alert-name">${am.name}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">${am.brands} marcas</div>
+                            </div>
+                        </div>
+                        <div class="alert-items">
+                            ${alertsHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update alert badge
+            const criticalAlerts = amsData.reduce((sum, am) => sum + am.alerts.filter(a => a.type === 'critical').length, 0);
+            document.getElementById('alertBadge').textContent = criticalAlerts;
+        }
+
+        // Go Home
+        function goHome() {
+            window.parent.postMessage('goHome', '*');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>COMU — Memory & Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;padding:24px;}
+.header{margin-bottom:24px;}
+.header h1{font-size:24px;font-weight:800;}
+.header p{font-size:13px;color:#718096;margin-top:4px;}
+
+.search-bar{background:#1D2035;border:1px solid #2d3748;border-radius:8px;padding:10px 16px;display:flex;gap:10px;align-items:center;margin-bottom:20px;}
+.search-bar input{background:none;border:none;color:#e2e8f0;font-size:14px;flex:1;outline:none;}
+.search-bar input::placeholder{color:#4a5568;}
+
+.memory-grid{display:grid;grid-template-columns:1fr 2fr;gap:20px;}
+
+/* Sidebar de datas */
+.dates-list{background:#1D2035;border:1px solid #2d3748;border-radius:12px;padding:16px;}
+.dates-list h3{font-size:13px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.date-item{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s;}
+.date-item:hover,.date-item.active{background:rgba(222,33,101,0.1);color:#DE2165;}
+.date-item .badge{background:#2d3748;color:#a0aec0;font-size:10px;padding:2px 6px;border-radius:10px;}
+.date-item.active .badge{background:#DE2165;color:white;}
+
+/* Conteúdo */
+.memory-content{display:flex;flex-direction:column;gap:16px;}
+.memory-card{background:#1D2035;border:1px solid #2d3748;border-radius:12px;padding:20px;}
+.memory-card h2{font-size:16px;font-weight:700;margin-bottom:4px;}
+.memory-card .meta{font-size:12px;color:#718096;margin-bottom:16px;}
+.memory-entry{border-left:3px solid #DE2165;padding:12px 16px;background:#0f1117;border-radius:0 8px 8px 0;margin-bottom:12px;}
+.memory-entry h4{font-size:13px;font-weight:700;margin-bottom:6px;}
+.memory-entry p{font-size:12px;color:#a0aec0;line-height:1.6;}
+.tag{display:inline-block;background:#2d3748;color:#a0aec0;font-size:10px;padding:2px 8px;border-radius:10px;margin-right:4px;margin-bottom:4px;}
+.tag.agent{background:rgba(222,33,101,0.15);color:#DE2165;}
+.tag.decision{background:rgba(66,153,225,0.15);color:#4299e1;}
+.tag.insight{background:rgba(72,187,120,0.15);color:#48bb78;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧠 Memory & Journal</h1>
+  <p>Histórico de conversas, decisões e insights do ecossistema COMU</p>
+</div>
+
+<div class="search-bar">
+  <span style="color:#718096">🔍</span>
+  <input type="text" placeholder="Buscar em memórias... (decisões, agentes, marcas)" id="search">
+</div>
+
+<div class="memory-grid">
+  <div class="dates-list">
+    <h3>📅 Por data</h3>
+    <div class="date-item active" onclick="showDate('2026-03-24')">
+      <span>24/03/2026</span><span class="badge">Hoje</span>
+    </div>
+    <div class="date-item" onclick="showDate('2026-03-23')">
+      <span>23/03/2026</span><span class="badge">12</span>
+    </div>
+    <div class="date-item" onclick="showDate('2026-03-22')">
+      <span>22/03/2026</span><span class="badge">8</span>
+    </div>
+    <div class="date-item" onclick="showDate('2026-03-21')">
+      <span>21/03/2026</span><span class="badge">5</span>
+    </div>
+  </div>
+
+  <div class="memory-content" id="memory-content">
+    <div class="memory-card">
+      <h2>📋 24/03/2026 — Terça</h2>
+      <div class="meta">Clerio + Bernardo • 9 entradas</div>
+      
+      <div class="memory-entry">
+        <h4>Planilha KPI CHICO enviada para Elisa</h4>
+        <p>53 marcas preenchidas com dados da semana 16/03-22/03. Email enviado para elisa.mucida@nossacomu.com.br com planilha e 8 reports.</p>
+        <span class="tag agent">CHICO</span>
+        <span class="tag decision">Email enviado</span>
+      </div>
+      
+      <div class="memory-entry">
+        <h4>SEBASTIÃO exportou Campaign+Creator (101.912 registros)</h4>
+        <p>Arquivo COMU_TAP_Campaign_Creator_2026-03-24.xlsx baixado. TOP 10 creators calculado para 63 marcas.</p>
+        <span class="tag agent">SEBASTIÃO</span>
+        <span class="tag insight">GMV TOP10 preenchido</span>
+      </div>
+      
+      <div class="memory-entry">
+        <h4>Decisão: Mission Control como Hub central do time</h4>
+        <p>Escolhido Mission Control (já rodando no Docker) como plataforma central. Cada membro do time terá seu próprio login. Próximo passo: integrar Hub pages dentro do MC.</p>
+        <span class="tag decision">Arquitetura</span>
+      </div>
+
+      <div class="memory-entry">
+        <h4>Hub 2.0 — Cost Tracker, Calendar, Docs, Settings criados</h4>
+        <p>4 novas páginas adicionadas ao Hub. Cost Tracker mostra custo estimado por agente. Calendar mostra timeline de execuções. Docs lista todos os reports. Settings controla modelos.</p>
+        <span class="tag insight">Hub 2.0</span>
+      </div>
+
+      <div class="memory-entry">
+        <h4>Estratégia de modelos otimizada</h4>
+        <p>OSVALDO/APARECIDO/GERALDO → Opus. SEBASTIÃO/JERÔNIMO/VALDIR/TIAGO → Sonnet. HUGO/CHICO → Haiku. HUGO migrado para Gemini Flash. Meta: menos de $5/dia.</p>
+        <span class="tag decision">Custo</span>
+        <span class="tag insight">Otimização</span>
+      </div>
+    </div>
+
+    <div class="memory-card">
+      <h2>📚 Insights dos Vídeos (24/03)</h2>
+      <div class="meta">5 vídeos analisados • OpenClaw ecosystem</div>
+      
+      <div class="memory-entry">
+        <h4>NOX — Agente de Segurança (prioridade alta)</h4>
+        <p>Monitora scope creep, saúde dos agentes e uso de API keys. Crítico para operação segura com 9+ agentes.</p>
+        <span class="tag agent">NOX (criar)</span>
+      </div>
+      
+      <div class="memory-entry">
+        <h4>IVY — Research Agent (scraping TikTok trends)</h4>
+        <p>Scraping 24/7 de trends TikTok Shop, novas marcas e oportunidades. Alimenta HUGO com dados frescos.</p>
+        <span class="tag agent">IVY (criar)</span>
+        <span class="tag insight">Próxima semana</span>
+      </div>
+      
+      <div class="memory-entry">
+        <h4>Gemma local para emails = $0</h4>
+        <p>Processar emails das marcas localmente com Gemma (modelo open source). Dados sensíveis não saem do PC. Escalar para Claude só quando necessário.</p>
+        <span class="tag insight">Custo zero</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showDate(date) {
+  document.querySelectorAll('.date-item').forEach(d => d.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+document.getElementById('search').addEventListener('input', function(e) {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.memory-entry').forEach(entry => {
+    entry.style.display = entry.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

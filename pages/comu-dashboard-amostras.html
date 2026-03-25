@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMU Hub — Painel de Amostras</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #DE2165;
+            --primary-light: rgba(222,33,101,0.1);
+            --primary-glow: rgba(222,33,101,0.25);
+            --dark: #1D2035;
+            --bg: #F8F9FC;
+            --bg-card: #FFFFFF;
+            --bg-secondary: #F1F5F9;
+            --bg-header: #FFFFFF;
+            --text: #1D2035;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --green: #10B981;
+            --green-bg: rgba(16,185,129,0.1);
+            --yellow: #F59E0B;
+            --yellow-bg: rgba(245,158,11,0.1);
+            --red: #EF4444;
+            --red-bg: rgba(239,68,68,0.1);
+            --blue: #3B82F6;
+            --blue-bg: rgba(59,130,246,0.1);
+            --purple: #8B5CF6;
+            --purple-bg: rgba(139,92,246,0.1);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        body.dark-mode {
+            --bg: #0F1117;
+            --bg-card: #1D2035;
+            --bg-secondary: #151A2F;
+            --bg-header: #1D2035;
+            --text: #F1F5F9;
+            --text-light: #94A3B8;
+            --border: #2D3555;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-lg: 0 4px 20px rgba(0,0,0,0.4);
+            --green-bg: rgba(16,185,129,0.15);
+            --yellow-bg: rgba(245,158,11,0.15);
+            --red-bg: rgba(239,68,68,0.15);
+            --blue-bg: rgba(59,130,246,0.15);
+            --purple-bg: rgba(139,92,246,0.15);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-header);
+            border-bottom: 2px solid var(--primary);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .header-title .badge {
+            background: var(--primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .clock {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .toggle-dark {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .toggle-dark:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        /* Tabs */
+        .tabs-bar {
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-btn .tab-icon {
+            font-size: 1rem;
+        }
+
+        /* Content */
+        .content {
+            padding: 24px;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity:0; transform:translateY(8px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        /* Agent Cards */
+        .agents-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+        }
+
+        .agent-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .agent-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .agent-info {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            margin-bottom: 2px;
+        }
+
+        .agent-role {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .agent-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .agent-stats {
+            display: flex;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .agent-stat {
+            text-align: center;
+        }
+
+        .agent-stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .agent-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .kpi-card.pink::before { background: var(--primary); }
+        .kpi-card.green::before { background: var(--green); }
+        .kpi-card.yellow::before { background: var(--yellow); }
+        .kpi-card.blue::before { background: var(--blue); }
+        .kpi-card.purple::before { background: var(--purple); }
+
+        .kpi-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 4px;
+        }
+
+        .kpi-detail {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        /* Funnel */
+        .funnel-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .funnel-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 20px 0;
+        }
+
+        .funnel-step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .funnel-bubble {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 auto 10px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .funnel-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .funnel-sublabel {
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+
+        .funnel-arrow {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin: 0 -8px;
+            flex-shrink: 0;
+            position: relative;
+            top: -15px;
+        }
+
+        .funnel-rate {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--green);
+            background: var(--green-bg);
+            padding: 2px 8px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 280px;
+        }
+
+        /* Tables */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-secondary);
+        }
+
+        th {
+            padding: 12px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--primary-light);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .status {
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-approved { background: var(--green-bg); color: var(--green); }
+        .status-pending { background: var(--yellow-bg); color: var(--yellow); }
+        .status-rejected { background: var(--red-bg); color: var(--red); }
+
+        /* Brand row */
+        .brand-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-emoji {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+        }
+
+        .brand-info .brand-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .brand-info .brand-sub {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Rule box */
+        .rule-box {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--primary);
+            padding: 18px 24px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .rule-icon {
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .rule-content {
+            flex: 1;
+        }
+
+        .rule-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            margin-bottom: 2px;
+        }
+
+        .rule-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            color: var(--primary);
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        /* GMV Badge */
+        .gmv-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .gmv-above { background: var(--green-bg); color: var(--green); }
+        .gmv-below { background: var(--red-bg); color: var(--red); }
+
+        /* Summary row */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Top Creator badge */
+        .creator-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .creator-tag .handle {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+            .agents-row { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .funnel-flow { flex-wrap: wrap; }
+            .summary-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="goHome()">← Voltar</button>
+            <div class="header-title">
+                <h1>📦 Painel de Amostras</h1>
+                <span class="badge">GERALDO + RENATO</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="clock" id="clock">--:--:--</span>
+            <button class="toggle-dark" onclick="toggleDarkMode()">🌓</button>
+        </div>
+    </div>
+
+    <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab(0)"><span class="tab-icon">📊</span> Visão Geral</button>
+        <button class="tab-btn" onclick="switchTab(1)"><span class="tab-icon">🤖</span> GERALDO — TAP</button>
+        <button class="tab-btn" onclick="switchTab(2)"><span class="tab-icon">🤖</span> RENATO — CAP</button>
+    </div>
+
+    <div class="content">
+        <!-- TAB 0: Visão Geral -->
+        <div id="tab-0" class="tab-content active">
+
+            <!-- Agent Cards -->
+            <div class="agents-row">
+                <div class="agent-card" style="border-left: 4px solid var(--primary)">
+                    <div class="agent-icon" style="background:var(--primary-light);color:var(--primary)">🤖</div>
+                    <div class="agent-info">
+                        <div class="agent-name">GERALDO</div>
+                        <div class="agent-role" style="color:var(--primary)">Amostras TAP</div>
+                        <div class="agent-desc">Auto-aprova creators com GMV ≥ R$50K</div>
+                    </div>
+                    <div class="agent-stats">
+                        <div class="agent-stat">
+                            <div class="agent-stat-value" style="color:var(--primary)">7</div>
+                            <div class="agent-stat-label">Marcas</div>
+                        </div>
+                        <div class="agent-stat">
+                            <div class="agent-stat-value" style="color:var(--green)">5</div>
+                            <div class="agent-stat-label">Aprovadas</div>
+                        </div>
+                        <div class="agent-stat">
+                            <div class="agent-stat-value" style="color:var(--yellow)">46</div>
+                            <div class="agent-stat-label">Pendentes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="agent-card" style="border-left: 4px solid var(--green)">
+                    <div class="agent-icon" style="background:var(--green-bg);color:var(--green)">🤖</div>
+                    <div class="agent-info">
+                        <div class="agent-name">RENATO</div>
+                        <div class="agent-role" style="color:var(--green)">Amostras CAP</div>
+                        <div class="agent-desc">Regras individuais por marca — Farol TAP</div>
+                    </div>
+                    <div class="agent-stats">
+                        <div class="agent-stat">
+                            <div class="agent-stat-value" style="color:var(--green)">10</div>
+                            <div class="agent-stat-label">Marcas</div>
+                        </div>
+                        <div class="agent-stat">
+                            <div class="agent-stat-value" style="color:var(--green)">21</div>
+                            <div class="agent-stat-label">Aprovadas</div>
+                        </div>
+                        <div class="agent-stat">
+                            <div class="agent-stat-value" style="color:var(--yellow)">16</div>
+                            <div class="agent-stat-label">Pendentes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card pink">
+                    <div class="kpi-icon">📦</div>
+                    <div class="kpi-label">Total Amostras</div>
+                    <div class="kpi-value" style="color:var(--primary)">88</div>
+                    <div class="kpi-detail">TAP + CAP combinado</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="kpi-icon">✅</div>
+                    <div class="kpi-label">Aprovadas</div>
+                    <div class="kpi-value" style="color:var(--green)">26</div>
+                    <div class="kpi-detail">Enviadas para creators</div>
+                </div>
+                <div class="kpi-card yellow">
+                    <div class="kpi-icon">⏳</div>
+                    <div class="kpi-label">Pendentes</div>
+                    <div class="kpi-value" style="color:var(--yellow)">62</div>
+                    <div class="kpi-detail">Em processamento</div>
+                </div>
+                <div class="kpi-card blue">
+                    <div class="kpi-icon">📈</div>
+                    <div class="kpi-label">Taxa de Aprovação</div>
+                    <div class="kpi-value" style="color:var(--blue)">29.5%</div>
+                    <div class="kpi-detail">Últimos 28 dias</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-icon">🏷️</div>
+                    <div class="kpi-label">Marcas Ativas</div>
+                    <div class="kpi-value" style="color:var(--purple)">17</div>
+                    <div class="kpi-detail">Solicitando amostras</div>
+                </div>
+            </div>
+
+            <!-- Funnel -->
+            <div class="funnel-section">
+                <div class="section-header">
+                    <div class="section-title">🔄 Fluxo de Amostras</div>
+                    <div class="section-subtitle">Pipeline de solicitação → aprovação → envio</div>
+                </div>
+                <div class="funnel-flow">
+                    <div class="funnel-step">
+                        <div class="funnel-bubble" style="background:var(--blue);width:80px;height:80px;font-size:1.6rem">88</div>
+                        <div class="funnel-label">Solicitações</div>
+                        <div class="funnel-sublabel">Total recebido</div>
+                    </div>
+                    <div class="funnel-arrow">→</div>
+                    <div class="funnel-step">
+                        <div class="funnel-rate">100%</div>
+                        <div class="funnel-bubble" style="background:var(--purple);width:74px;height:74px;font-size:1.5rem">88</div>
+                        <div class="funnel-label">Analisadas</div>
+                        <div class="funnel-sublabel">GERALDO + RENATO</div>
+                    </div>
+                    <div class="funnel-arrow">→</div>
+                    <div class="funnel-step">
+                        <div class="funnel-rate">29.5%</div>
+                        <div class="funnel-bubble" style="background:var(--green);width:64px;height:64px;font-size:1.4rem">26</div>
+                        <div class="funnel-label">Aprovadas</div>
+                        <div class="funnel-sublabel">GMV acima do limite</div>
+                    </div>
+                    <div class="funnel-arrow">→</div>
+                    <div class="funnel-step">
+                        <div class="funnel-rate">92%</div>
+                        <div class="funnel-bubble" style="background:var(--primary);width:58px;height:58px;font-size:1.2rem">24</div>
+                        <div class="funnel-label">Enviadas</div>
+                        <div class="funnel-sublabel">Amostra em mãos</div>
+                    </div>
+                    <div class="funnel-arrow">→</div>
+                    <div class="funnel-step">
+                        <div class="funnel-rate">62.5%</div>
+                        <div class="funnel-bubble" style="background:#F97316;width:52px;height:52px;font-size:1.1rem">15</div>
+                        <div class="funnel-label">Conteúdo Criado</div>
+                        <div class="funnel-sublabel">Vídeo publicado</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>📊 Aprovações por Marca (Top 10)</h3>
+                    <div class="chart-wrap">
+                        <canvas id="brandsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>🔄 Split TAP vs CAP</h3>
+                    <div class="chart-wrap">
+                        <canvas id="splitChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking Marcas com mais Amostras -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>🏅 Ranking de Marcas por Volume de Amostras</h3>
+                    <span style="font-size:0.8rem;color:var(--text-light)">Top solicitantes · Últimos 28 dias</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40px">#</th>
+                            <th>Marca</th>
+                            <th>Tipo</th>
+                            <th style="text-align:right">Solicitações</th>
+                            <th style="text-align:right">Aprovadas</th>
+                            <th style="text-align:right">Taxa</th>
+                            <th style="min-width:100px">Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody id="brandRankingBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 1: GERALDO — TAP -->
+        <div id="tab-1" class="tab-content">
+            <div class="rule-box">
+                <div class="rule-icon">⚡</div>
+                <div class="rule-content">
+                    <div class="rule-title">Regra de Auto-Aprovação — GERALDO</div>
+                    <div class="rule-text">if creator.gmv_total >= R$50.000 → APROVADO automaticamente</div>
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-value" style="color:var(--primary)">51</div>
+                    <div class="summary-label">Total Solicitações TAP</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color:var(--green)">5</div>
+                    <div class="summary-label">Aprovadas (GMV ≥ 50K)</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color:var(--yellow)">46</div>
+                    <div class="summary-label">Abaixo do Threshold</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>🤖 Amostras TAP — Processadas pelo GERALDO</h3>
+                    <span style="font-size:0.8rem;color:var(--text-light)">7 marcas com solicitações ativas</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Marca</th>
+                            <th style="text-align:center">Solicitações</th>
+                            <th style="text-align:center">Aprovadas</th>
+                            <th style="text-align:center">Pendentes</th>
+                            <th style="text-align:right">Taxa</th>
+                            <th>Top Creator</th>
+                        </tr>
+                    </thead>
+                    <tbody id="geraldoBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: RENATO — CAP -->
+        <div id="tab-2" class="tab-content">
+            <div class="rule-box">
+                <div class="rule-icon">🎯</div>
+                <div class="rule-content">
+                    <div class="rule-title">Regras Individuais por Marca — RENATO</div>
+                    <div class="rule-text">Cada marca define seu GMV mínimo · Referência Farol TAP</div>
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-value" style="color:var(--green)">37</div>
+                    <div class="summary-label">Total Solicitações CAP</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color:var(--green)">21</div>
+                    <div class="summary-label">Aprovadas</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color:var(--blue)">56.8%</div>
+                    <div class="summary-label">Taxa de Aprovação</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>🤖 Amostras CAP — Processadas pelo RENATO</h3>
+                    <span style="font-size:0.8rem;color:var(--text-light)">10 marcas com regras customizadas</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Marca</th>
+                            <th style="text-align:right">GMV Mínimo</th>
+                            <th style="text-align:center">Solicitações</th>
+                            <th style="text-align:center">Aprovadas</th>
+                            <th style="text-align:center">Pendentes</th>
+                            <th style="text-align:right">Taxa</th>
+                            <th>Top Creator</th>
+                        </tr>
+                    </thead>
+                    <tbody id="renatoBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =================== DATA ===================
+        const geraldoData = [
+            { name: 'Dot', emoji: '⚡', requests: 17, approved: 0, pending: 17, topCreator: '@anapaula_ce', topGMV: 40000, aboveThreshold: false },
+            { name: 'Renova Be', emoji: '✨', requests: 12, approved: 2, pending: 10, topCreator: '@laavsri', topGMV: 602000, aboveThreshold: true },
+            { name: 'Zalia', emoji: '🌸', requests: 8, approved: 1, pending: 7, topCreator: '@vitrineshopbyjaque', topGMV: 450000, aboveThreshold: true },
+            { name: 'Magic Muuh', emoji: '💪', requests: 5, approved: 0, pending: 5, topCreator: null, topGMV: 0, aboveThreshold: false },
+            { name: 'Zaya Beauty', emoji: '💎', requests: 4, approved: 0, pending: 4, topCreator: null, topGMV: 0, aboveThreshold: false },
+            { name: 'Noma Beauty', emoji: '🌺', requests: 3, approved: 1, pending: 2, topCreator: '@ericamcabeluda', topGMV: 543000, aboveThreshold: true },
+            { name: 'Nanovit', emoji: '💊', requests: 2, approved: 1, pending: 1, topCreator: '@kevelybr', topGMV: 441000, aboveThreshold: true }
+        ];
+
+        const renatoData = [
+            { name: 'Barbours', emoji: '👔', gmvMin: 50000, requests: 8, approved: 5, pending: 3, topCreator: '@amanda_beauty', topGMV: 89000 },
+            { name: 'Sallve', emoji: '🧴', gmvMin: 50000, requests: 6, approved: 4, pending: 2, topCreator: '@skincare_julia', topGMV: 124000 },
+            { name: 'Guday', emoji: '🌟', gmvMin: 50000, requests: 5, approved: 3, pending: 2, topCreator: '@amanda_beauty', topGMV: 89000 },
+            { name: 'Amend', emoji: '💇', gmvMin: 50000, requests: 4, approved: 2, pending: 2, topCreator: '@hair_carol', topGMV: 67000 },
+            { name: 'Aura', emoji: '✨', gmvMin: 50000, requests: 3, approved: 2, pending: 1, topCreator: '@glow_ana', topGMV: 78000 },
+            { name: 'Gocase', emoji: '📱', gmvMin: 50000, requests: 3, approved: 1, pending: 2, topCreator: '@tech_maria', topGMV: 56000 },
+            { name: 'Cicatribem', emoji: '💚', gmvMin: 30000, requests: 3, approved: 2, pending: 1, topCreator: '@derma_lu', topGMV: 45000 },
+            { name: 'L\'Oréal', emoji: '💄', gmvMin: 100000, requests: 2, approved: 0, pending: 2, topCreator: '@beauty_isa', topGMV: 82000 },
+            { name: 'Beta', emoji: '🧪', gmvMin: 50000, requests: 2, approved: 1, pending: 1, topCreator: '@test_user', topGMV: 61000 },
+            { name: 'FreeCo', emoji: '🌿', gmvMin: 50000, requests: 1, approved: 1, pending: 0, topCreator: '@eu.fabiserpa', topGMV: 143000 }
+        ];
+
+        let chartInstances = {};
+
+        // =================== INIT ===================
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            renderBrandRanking();
+            renderGeraldoTable();
+            renderRenatoTable();
+            initCharts();
+        });
+
+        // =================== CLOCK ===================
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('pt-BR', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                timeZone: 'America/Sao_Paulo'
+            });
+        }
+
+        // =================== DARK MODE ===================
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            Object.values(chartInstances).forEach(c => c && c.destroy());
+            chartInstances = {};
+            setTimeout(initCharts, 100);
+        }
+
+        // =================== TABS ===================
+        function switchTab(idx) {
+            document.querySelectorAll('.tab-content').forEach((t, i) => t.classList.toggle('active', i === idx));
+            document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+            if (idx === 0) {
+                setTimeout(() => Object.values(chartInstances).forEach(c => c && c.resize()), 100);
+            }
+        }
+
+        // =================== BRAND RANKING TABLE ===================
+        function renderBrandRanking() {
+            const allBrands = [];
+
+            geraldoData.forEach(b => {
+                allBrands.push({ name: b.name, emoji: b.emoji, type: 'TAP', requests: b.requests, approved: b.approved });
+            });
+            renatoData.forEach(b => {
+                const existing = allBrands.find(a => a.name === b.name);
+                if (existing) {
+                    existing.requests += b.requests;
+                    existing.approved += b.approved;
+                    existing.type = 'TAP+CAP';
+                } else {
+                    allBrands.push({ name: b.name, emoji: b.emoji, type: 'CAP', requests: b.requests, approved: b.approved });
+                }
+            });
+
+            allBrands.sort((a, b) => b.requests - a.requests);
+            const maxReq = allBrands[0]?.requests || 1;
+
+            document.getElementById('brandRankingBody').innerHTML = allBrands.map((b, i) => {
+                const pos = i + 1;
+                const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `<span style="color:var(--text-light);font-weight:600">${pos}</span>`;
+                const rate = b.requests > 0 ? ((b.approved / b.requests) * 100).toFixed(0) : 0;
+                const rateColor = rate >= 50 ? 'var(--green)' : rate >= 20 ? 'var(--yellow)' : 'var(--red)';
+                const typeBg = b.type === 'TAP' ? 'var(--primary-light)' : b.type === 'CAP' ? 'var(--green-bg)' : 'var(--purple-bg)';
+                const typeColor = b.type === 'TAP' ? 'var(--primary)' : b.type === 'CAP' ? 'var(--green)' : 'var(--purple)';
+                const barPct = Math.round((b.requests / maxReq) * 100);
+
+                return `<tr>
+                    <td style="text-align:center;font-size:1.1rem">${medal}</td>
+                    <td>
+                        <div class="brand-cell">
+                            <div class="brand-emoji">${b.emoji}</div>
+                            <div class="brand-info"><div class="brand-name">${b.name}</div></div>
+                        </div>
+                    </td>
+                    <td><span style="background:${typeBg};color:${typeColor};padding:3px 10px;border-radius:8px;font-size:0.78rem;font-weight:700">${b.type}</span></td>
+                    <td style="text-align:right;font-weight:800">${b.requests}</td>
+                    <td style="text-align:right;font-weight:700;color:var(--green)">${b.approved}</td>
+                    <td style="text-align:right"><span style="color:${rateColor};font-weight:700">${rate}%</span></td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:${barPct}%;background:var(--primary)"></div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // =================== GERALDO TABLE ===================
+        function renderGeraldoTable() {
+            document.getElementById('geraldoBody').innerHTML = geraldoData.map(b => {
+                const rate = b.requests > 0 ? ((b.approved / b.requests) * 100).toFixed(0) : 0;
+                const rateColor = rate > 0 ? 'var(--green)' : 'var(--red)';
+
+                let creatorHtml;
+                if (!b.topCreator) {
+                    creatorHtml = '<span style="color:var(--text-light);font-style:italic">Todos abaixo de R$50K</span>';
+                } else {
+                    const gmvStr = b.topGMV >= 1000 ? `R$${(b.topGMV/1000).toFixed(0)}K` : `R$${b.topGMV}`;
+                    creatorHtml = `<div class="creator-tag"><span class="handle">${b.topCreator}</span> <span class="gmv-badge ${b.aboveThreshold ? 'gmv-above' : 'gmv-below'}">${b.aboveThreshold ? '✅' : '❌'} ${gmvStr}</span></div>`;
+                }
+
+                return `<tr>
+                    <td>
+                        <div class="brand-cell">
+                            <div class="brand-emoji">${b.emoji}</div>
+                            <div class="brand-info">
+                                <div class="brand-name">${b.name}</div>
+                                <div class="brand-sub">Threshold: R$50K</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align:center;font-weight:700;font-size:1.05rem">${b.requests}</td>
+                    <td style="text-align:center"><span class="status status-approved">${b.approved}</span></td>
+                    <td style="text-align:center"><span class="status status-pending">${b.pending}</span></td>
+                    <td style="text-align:right"><span style="color:${rateColor};font-weight:700">${rate}%</span></td>
+                    <td>${creatorHtml}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // =================== RENATO TABLE ===================
+        function renderRenatoTable() {
+            document.getElementById('renatoBody').innerHTML = renatoData.map(b => {
+                const rate = b.requests > 0 ? ((b.approved / b.requests) * 100).toFixed(0) : 0;
+                const rateColor = rate >= 50 ? 'var(--green)' : rate >= 30 ? 'var(--yellow)' : 'var(--red)';
+                const gmvStr = b.topGMV >= 1000 ? `R$${(b.topGMV/1000).toFixed(0)}K` : `R$${b.topGMV}`;
+                const isAbove = b.topGMV >= b.gmvMin;
+                const gmvMinStr = `R$${(b.gmvMin/1000).toFixed(0)}K`;
+
+                return `<tr>
+                    <td>
+                        <div class="brand-cell">
+                            <div class="brand-emoji">${b.emoji}</div>
+                            <div class="brand-info">
+                                <div class="brand-name">${b.name}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align:right"><span style="background:var(--bg-secondary);padding:3px 10px;border-radius:8px;font-weight:700;font-size:0.85rem">${gmvMinStr}</span></td>
+                    <td style="text-align:center;font-weight:700;font-size:1.05rem">${b.requests}</td>
+                    <td style="text-align:center"><span class="status status-approved">${b.approved}</span></td>
+                    <td style="text-align:center"><span class="status status-pending">${b.pending}</span></td>
+                    <td style="text-align:right"><span style="color:${rateColor};font-weight:700">${rate}%</span></td>
+                    <td><div class="creator-tag"><span class="handle">${b.topCreator}</span> <span class="gmv-badge ${isAbove ? 'gmv-above' : 'gmv-below'}">${isAbove ? '✅' : '❌'} ${gmvStr}</span></div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // =================== CHARTS ===================
+        function initCharts() {
+            const isDark = document.body.classList.contains('dark-mode');
+            const textColor = isDark ? '#F1F5F9' : '#1D2035';
+            const gridColor = isDark ? '#334155' : '#E2E8F0';
+
+            // Brands Chart
+            const allBrands = [];
+            geraldoData.forEach(b => allBrands.push({ name: b.name, approved: b.approved, pending: b.pending }));
+            renatoData.forEach(b => {
+                const ex = allBrands.find(a => a.name === b.name);
+                if (ex) { ex.approved += b.approved; ex.pending += b.pending; }
+                else allBrands.push({ name: b.name, approved: b.approved, pending: b.pending });
+            });
+            allBrands.sort((a, b) => (b.approved + b.pending) - (a.approved + a.pending));
+            const top10 = allBrands.slice(0, 10);
+
+            const ctx1 = document.getElementById('brandsChart').getContext('2d');
+            chartInstances.brands = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: top10.map(b => b.name),
+                    datasets: [
+                        {
+                            label: 'Aprovadas',
+                            data: top10.map(b => b.approved),
+                            backgroundColor: '#10B981',
+                            borderRadius: 4,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Pendentes',
+                            data: top10.map(b => b.pending),
+                            backgroundColor: '#F59E0B',
+                            borderRadius: 4,
+                            borderSkipped: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor, font: { weight: '600' }, padding: 15 }
+                        }
+                    },
+                    scales: {
+                        y: { ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true, stacked: true },
+                        x: { ticks: { color: textColor, maxRotation: 45 }, grid: { display: false }, stacked: true }
+                    }
+                }
+            });
+
+            // Split Doughnut
+            const tapTotal = geraldoData.reduce((s, b) => s + b.requests, 0);
+            const capTotal = renatoData.reduce((s, b) => s + b.requests, 0);
+
+            const ctx2 = document.getElementById('splitChart').getContext('2d');
+            chartInstances.split = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['TAP (GERALDO)', 'CAP (RENATO)'],
+                    datasets: [{
+                        data: [tapTotal, capTotal],
+                        backgroundColor: ['#DE2165', '#10B981'],
+                        borderColor: isDark ? '#1D2035' : '#FFFFFF',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: textColor, font: { size: 13, weight: '600' }, padding: 20 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =================== NAV ===================
+        function goHome() {
+            window.parent.postMessage('goHome', '*');
+        }
+    </script>
+</body>
+</html>

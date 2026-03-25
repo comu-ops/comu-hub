@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COMU — Cost Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;padding:24px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.header-left h1{font-size:24px;font-weight:800;color:#e2e8f0;}
+.header-left p{font-size:13px;color:#718096;margin-top:2px;}
+.badge{background:rgba(72,187,120,0.15);color:#48bb78;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{background:#1D2035;border:1px solid #2d3748;border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+.kpi-icon{font-size:28px;margin-bottom:12px;}
+.kpi-value{font-size:28px;font-weight:800;color:#e2e8f0;line-height:1;}
+.kpi-label{font-size:12px;color:#718096;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-sub{font-size:11px;color:#48bb78;margin-top:6px;}
+
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.card{background:#1D2035;border:1px solid #2d3748;border-radius:12px;padding:20px;}
+.card-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+.agent-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #1a1f2e;}
+.agent-row:last-child{border-bottom:none;}
+.agent-emoji{font-size:22px;width:32px;text-align:center;}
+.agent-info{flex:1;}
+.agent-info h4{font-size:13px;font-weight:700;}
+.agent-info p{font-size:11px;color:#718096;margin-top:2px;}
+.model-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;margin-left:6px;}
+.model-opus{background:rgba(222,33,101,0.2);color:#DE2165;}
+.model-sonnet{background:rgba(66,153,225,0.2);color:#4299e1;}
+.model-haiku{background:rgba(72,187,120,0.2);color:#48bb78;}
+.model-gemini{background:rgba(159,122,234,0.2);color:#9f7aea;}
+.cost-col{text-align:right;}
+.cost-daily{font-size:16px;font-weight:800;color:#e2e8f0;}
+.cost-monthly{font-size:11px;color:#718096;margin-top:2px;}
+.cost-bar-wrap{margin-top:4px;height:4px;background:#0f1117;border-radius:2px;width:80px;margin-left:auto;}
+.cost-bar{height:4px;border-radius:2px;background:var(--bar-color);}
+
+.tips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+.tip-card{background:#1D2035;border:1px solid #2d3748;border-radius:10px;padding:16px;}
+.tip-icon{font-size:24px;margin-bottom:8px;}
+.tip-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.tip-text{font-size:12px;color:#718096;line-height:1.5;}
+
+.section-title{font-size:16px;font-weight:700;margin-bottom:12px;color:#e2e8f0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>💰 Cost Tracker</h1>
+    <p>COMU AI Agents — Estimativa de custos por modelo de IA</p>
+  </div>
+  <div class="badge">📊 Estimativa diária</div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card" style="--accent:#DE2165">
+    <div class="kpi-icon">💸</div>
+    <div class="kpi-value">$4.40</div>
+    <div class="kpi-label">Custo Diário Total</div>
+    <div class="kpi-sub">Todos os 9 agentes</div>
+  </div>
+  <div class="kpi-card" style="--accent:#4299e1">
+    <div class="kpi-icon">📅</div>
+    <div class="kpi-value">$132</div>
+    <div class="kpi-label">Projeção Mensal</div>
+    <div class="kpi-sub">~30 dias de operação</div>
+  </div>
+  <div class="kpi-card" style="--accent:#48bb78">
+    <div class="kpi-icon">🤖</div>
+    <div class="kpi-value">4</div>
+    <div class="kpi-label">Modelos em Uso</div>
+    <div class="kpi-sub">Opus, Sonnet, Haiku, Gemini</div>
+  </div>
+  <div class="kpi-card" style="--accent:#9f7aea">
+    <div class="kpi-icon">📉</div>
+    <div class="kpi-value">$0.10</div>
+    <div class="kpi-label">Menor Custo/Agente</div>
+    <div class="kpi-sub">HUGO — Gemini Flash</div>
+  </div>
+</div>
+
+<!-- Main content: table + chart -->
+<div class="main-grid">
+  <div class="card">
+    <div class="card-title">🤖 Custo por Agente</div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">📊</div>
+      <div class="agent-info">
+        <h4>SEBASTIÃO <span class="model-tag model-sonnet">Claude Sonnet</span></h4>
+        <p>Dashboard executivo · Roda diário 09h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.50</div>
+        <div class="cost-monthly">~$15/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:25%;--bar-color:#4299e1;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">🔎</div>
+      <div class="agent-info">
+        <h4>JERÔNIMO <span class="model-tag model-sonnet">Claude Sonnet</span></h4>
+        <p>Monitoramento de feeds · Roda diário 10h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.30</div>
+        <div class="cost-monthly">~$9/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:15%;--bar-color:#4299e1;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">⏰</div>
+      <div class="agent-info">
+        <h4>OSVALDO <span class="model-tag model-opus">Claude Opus</span></h4>
+        <p>Monitor expiring creators · Roda diário 11h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$2.00</div>
+        <div class="cost-monthly">~$60/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:100%;--bar-color:#DE2165;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">🔍</div>
+      <div class="agent-info">
+        <h4>VALDIR <span class="model-tag model-sonnet">Claude Sonnet</span></h4>
+        <p>TAP Scouter · Roda diário 12h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.40</div>
+        <div class="cost-monthly">~$12/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:20%;--bar-color:#4299e1;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">📬</div>
+      <div class="agent-info">
+        <h4>APARECIDO <span class="model-tag model-sonnet">Claude Sonnet</span></h4>
+        <p>Mensageiro TAP · Roda diário 13h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.30</div>
+        <div class="cost-monthly">~$9/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:15%;--bar-color:#4299e1;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">📨</div>
+      <div class="agent-info">
+        <h4>TIAGO <span class="model-tag model-sonnet">Claude Sonnet</span></h4>
+        <p>TAP Sender universal · Roda diário 14h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.30</div>
+        <div class="cost-monthly">~$9/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:15%;--bar-color:#4299e1;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">✅</div>
+      <div class="agent-info">
+        <h4>GERALDO <span class="model-tag model-opus">Claude Opus</span></h4>
+        <p>Aprovação de amostras · Seg-Sex 15h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$1.50</div>
+        <div class="cost-monthly">~$33/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:75%;--bar-color:#DE2165;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">📈</div>
+      <div class="agent-info">
+        <h4>HUGO <span class="model-tag model-gemini">Gemini Flash</span></h4>
+        <p>Reports Google Sheets · Seg+Qui 16h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.10</div>
+        <div class="cost-monthly">~$0.80/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:5%;--bar-color:#9f7aea;"></div></div>
+      </div>
+    </div>
+
+    <div class="agent-row">
+      <div class="agent-emoji">🧹</div>
+      <div class="agent-info">
+        <h4>CHICO <span class="model-tag model-haiku">Claude Haiku</span></h4>
+        <p>Limpeza de dados · Terças 02h</p>
+      </div>
+      <div class="cost-col">
+        <div class="cost-daily">$0.30</div>
+        <div class="cost-monthly">~$1.20/mês</div>
+        <div class="cost-bar-wrap"><div class="cost-bar" style="width:15%;--bar-color:#48bb78;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Distribuição de Custos por Modelo</div>
+    <canvas id="costChart" height="220"></canvas>
+    <div style="margin-top:20px;">
+      <div class="card-title">💡 Projeção Mensal por Modelo</div>
+      <canvas id="monthlyChart" height="160"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Tips -->
+<div class="section-title">💡 Dicas para Reduzir Custos</div>
+<div class="tips-grid">
+  <div class="tip-card">
+    <div class="tip-icon">🔄</div>
+    <div class="tip-title">Downgrade OSVALDO</div>
+    <div class="tip-text">OSVALDO usa Opus ($2/dia). Migrar para Sonnet pode reduzir para ~$0.50/dia economizando $45/mês sem perda significativa de qualidade.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">📉</div>
+    <div class="tip-title">Downgrade GERALDO</div>
+    <div class="tip-text">GERALDO usa Opus para aprovação de amostras. Sonnet com prompt otimizado pode performar igualmente, economizando ~$20/mês.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">⚡</div>
+    <div class="tip-title">Cache de Contexto</div>
+    <div class="tip-text">Usar prompt caching da Anthropic pode reduzir custos em até 90% para prompts com contextos grandes e repetitivos nos agentes Opus.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">🎯</div>
+    <div class="tip-title">Batch Processing</div>
+    <div class="tip-text">Combinar tarefas de VALDIR + APARECIDO em uma única execução pode reduzir chamadas de API e overhead de contexto em 30-40%.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">🤖</div>
+    <div class="tip-title">Mais Gemini</div>
+    <div class="tip-text">HUGO gasta apenas $0.10/dia usando Gemini Flash. Tarefas de relatório e análise de dados podem ser migradas para Gemini com grande economia.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">📋</div>
+    <div class="tip-title">Haiku para Filtragem</div>
+    <div class="tip-text">Usar Haiku (como CHICO) para pré-processamento e filtragem de dados antes de passar para Opus/Sonnet pode reduzir tokens totais em 50%.</div>
+  </div>
+</div>
+
+<script>
+// Cost distribution donut chart
+const ctx1 = document.getElementById('costChart').getContext('2d');
+new Chart(ctx1, {
+  type: 'doughnut',
+  data: {
+    labels: ['OSVALDO (Opus)', 'GERALDO (Opus)', 'SEBASTIÃO (Sonnet)', 'VALDIR (Sonnet)', 'JERÔNIMO (Sonnet)', 'APARECIDO (Sonnet)', 'TIAGO (Sonnet)', 'CHICO (Haiku)', 'HUGO (Gemini)'],
+    datasets: [{
+      data: [2.00, 1.50, 0.50, 0.40, 0.30, 0.30, 0.30, 0.30, 0.10],
+      backgroundColor: ['#DE2165','#e05388','#4299e1','#63b3ed','#90cdf4','#bee3f8','#ebf8ff','#48bb78','#9f7aea'],
+      borderWidth: 2,
+      borderColor: '#1D2035'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position:'bottom', labels:{ color:'#a0aec0', font:{size:11}, boxWidth:12, padding:8 } },
+      tooltip: { callbacks: { label: ctx => ` $${ctx.raw.toFixed(2)}/dia` } }
+    }
+  }
+});
+
+// Monthly bar chart by model
+const ctx2 = document.getElementById('monthlyChart').getContext('2d');
+new Chart(ctx2, {
+  type: 'bar',
+  data: {
+    labels: ['Opus', 'Sonnet', 'Haiku', 'Gemini'],
+    datasets: [{
+      label: 'Custo Mensal ($)',
+      data: [105, 21, 1.2, 0.8],
+      backgroundColor: ['#DE2165','#4299e1','#48bb78','#9f7aea'],
+      borderRadius: 6,
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` $${ctx.raw.toFixed(2)}/mês` } }
+    },
+    scales: {
+      x: { grid:{ color:'#1a1f2e' }, ticks:{ color:'#a0aec0' } },
+      y: { grid:{ color:'#1a1f2e' }, ticks:{ color:'#a0aec0', callback: v => '$'+v } }
+    }
+  }
+});
+</script>
+</body>
+</html>

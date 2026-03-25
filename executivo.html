@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COMU Hub 2.0 — Executivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <style>
+    :root {
+      --primary: #DE2165;
+      --primary-light: rgba(222,33,101,0.15);
+      --dark: #1D2035;
+      --dark2: #252840;
+      --dark3: #2E3150;
+      --card: #242640;
+      --border: rgba(255,255,255,0.07);
+      --text: #E2E8F0;
+      --text-muted: #8892A4;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #60A5FA;
+      --sidebar-w: 230px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--dark); color:var(--text); display:flex; min-height:100vh; }
+    .sidebar { width:var(--sidebar-w); background:var(--dark2); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0;left:0;bottom:0; z-index:100; }
+    .sidebar-logo { padding:24px 20px 20px; border-bottom:1px solid var(--border); }
+    .brand { font-size:26px; font-weight:800; color:var(--primary); letter-spacing:-1px; }
+    .version { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .sidebar-nav { flex:1; padding:16px 0; overflow-y:auto; }
+    .nav-section-title { font-size:10px; font-weight:600; color:var(--text-muted); letter-spacing:1.2px; text-transform:uppercase; padding:12px 20px 6px; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:10px 20px; color:var(--text-muted); text-decoration:none; font-size:14px; font-weight:500; border-left:3px solid transparent; transition:all 0.2s; }
+    .nav-item:hover { color:var(--text); background:var(--primary-light); }
+    .nav-item.active { color:var(--text); background:var(--primary-light); border-left-color:var(--primary); }
+    .nav-item .icon { font-size:16px; width:20px; text-align:center; }
+    .nav-badge { margin-left:auto; background:var(--primary); color:white; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; }
+    .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted); }
+
+    .main { margin-left:var(--sidebar-w); flex:1; padding:32px; }
+    .page-header { margin-bottom:28px; }
+    .page-header h1 { font-size:28px; font-weight:800; }
+    .page-header p { font-size:14px; color:var(--text-muted); margin-top:4px; }
+
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    .kpi-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+    .kpi-label { font-size:11px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+    .kpi-val { font-size:36px; font-weight:800; margin:8px 0 4px; }
+    .kpi-sub { font-size:12px; color:var(--text-muted); }
+    .kpi-trend { font-size:12px; margin-top:4px; }
+    .trend-up { color:var(--success); }
+    .trend-down { color:var(--danger); }
+
+    .charts-row { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px; }
+    .chart-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+    .chart-card h3 { font-size:14px; font-weight:600; margin-bottom:16px; }
+
+    .table-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:24px; }
+    .table-card h3 { font-size:14px; font-weight:600; margin-bottom:16px; }
+    table { width:100%; border-collapse:collapse; }
+    th { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+    td { padding:10px 12px; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.04); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,0.02); }
+    .tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; }
+    .tag-sales { background:rgba(222,33,101,0.15); color:var(--primary); }
+    .tag-data { background:rgba(96,165,250,0.15); color:var(--info); }
+    .tag-ops { background:rgba(16,185,129,0.15); color:var(--success); }
+    .tag-comercial { background:rgba(245,158,11,0.15); color:var(--warning); }
+
+    .bottom-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .progress-list { display:flex; flex-direction:column; gap:12px; }
+    .progress-item {}
+    .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .progress-name { font-size:13px; font-weight:500; }
+    .progress-pct { font-size:13px; font-weight:700; color:var(--primary); }
+    .progress-bar { height:6px; background:var(--dark3); border-radius:10px; overflow:hidden; }
+    .progress-fill { height:100%; background:var(--primary); border-radius:10px; transition:width 1s; }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">COMU</div>
+    <div class="version">Hub 2.0 · Virtual Agent Office</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-title">Principal</div>
+    <a class="nav-item" href="index.html"><span class="icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="agents-office.html"><span class="icon">🤖</span> Escritório Virtual <span class="nav-badge">9</span></a>
+    <a class="nav-item active" href="executivo.html"><span class="icon">📊</span> Executivo</a>
+    <a class="nav-item" href="automacao.html"><span class="icon">⚙️</span> Automação</a>
+    <div class="nav-section-title">Agentes</div>
+    <a class="nav-item" href="agents-office.html#sebastiao"><span class="icon">📦</span> Sebastião</a>
+    <a class="nav-item" href="agents-office.html#jeronimo"><span class="icon">🔍</span> Jerônimo</a>
+    <a class="nav-item" href="agents-office.html#osvaldo"><span class="icon">🤝</span> Osvaldo</a>
+    <a class="nav-item" href="agents-office.html#valdir"><span class="icon">🎯</span> Valdir</a>
+    <a class="nav-item" href="agents-office.html#aparecido"><span class="icon">🛒</span> Aparecido</a>
+    <a class="nav-item" href="agents-office.html#tiago"><span class="icon">📤</span> Tiago</a>
+    <a class="nav-item" href="agents-office.html#geraldo"><span class="icon">📋</span> Geraldo</a>
+    <a class="nav-item" href="agents-office.html#hugo"><span class="icon">💼</span> Hugo</a>
+    <a class="nav-item" href="agents-office.html#chico"><span class="icon">📈</span> Chico</a>
+  </div>
+  <div class="sidebar-footer">
+    <span id="sidebar-clock" style="font-size:12px;"></span>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>📊 Dashboard Executivo</h1>
+    <p>Visão consolidada de performance · <span id="header-date"></span></p>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Creators no Pipeline</div>
+      <div class="kpi-val" style="color:var(--primary)">4.892</div>
+      <div class="kpi-sub">TAP + MCN ativos</div>
+      <div class="kpi-trend trend-up">↑ +12.3% semana</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Convites Enviados (30d)</div>
+      <div class="kpi-val" style="color:var(--info)">2.106</div>
+      <div class="kpi-sub">taxa de abertura: 38%</div>
+      <div class="kpi-trend trend-up">↑ +8.7% vs mês passado</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Parcerias Ativas</div>
+      <div class="kpi-val" style="color:var(--success)">847</div>
+      <div class="kpi-sub">renovação: 91% taxa</div>
+      <div class="kpi-trend trend-up">↑ +34 esta semana</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">GMV Gerado (mês)</div>
+      <div class="kpi-val" style="color:var(--warning)">R$1.2M</div>
+      <div class="kpi-sub">meta: R$1.5M</div>
+      <div class="kpi-trend" style="color:var(--warning)">→ 80% da meta</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>Execuções por Agente — Últimos 7 dias</h3>
+      <canvas id="chart-week" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Distribuição por Dept</h3>
+      <canvas id="chart-dept" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <h3>📋 Resumo dos Agentes — Performance Semanal</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Agente</th>
+          <th>Dept</th>
+          <th>Execuções</th>
+          <th>Items Processados</th>
+          <th>Taxa Sucesso</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>📦 SEBASTIÃO</td><td><span class="tag tag-data">DATA</span></td><td>7</td><td>16.884 exports</td><td style="color:var(--success)">99%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>🔍 JERÔNIMO</td><td><span class="tag tag-sales">TAP SALES</span></td><td>7</td><td>4.284 creators</td><td style="color:var(--success)">97%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>🤝 OSVALDO</td><td><span class="tag tag-ops">CAP OPS</span></td><td>7</td><td>266 parcerias</td><td style="color:var(--success)">100%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>🎯 VALDIR</td><td><span class="tag tag-sales">TAP SALES</span></td><td>7</td><td>637 prospects</td><td style="color:var(--success)">98%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>🛒 APARECIDO</td><td><span class="tag tag-sales">TAP SALES</span></td><td>7</td><td>2.240 produtos</td><td style="color:var(--warning)">96%</td><td style="color:var(--warning)">⚠ 1 erro</td></tr>
+        <tr><td>📤 TIAGO</td><td><span class="tag tag-sales">TAP SALES</span></td><td>7</td><td>469 convites</td><td style="color:var(--success)">99%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>📋 GERALDO</td><td><span class="tag tag-ops">COMU OPS</span></td><td>5</td><td>120 amostras</td><td style="color:var(--success)">100%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>💼 HUGO</td><td><span class="tag tag-comercial">COMERCIAL</span></td><td>2</td><td>10 leads</td><td style="color:var(--success)">95%</td><td style="color:var(--success)">✓ OK</td></tr>
+        <tr><td>📈 CHICO</td><td><span class="tag tag-ops">COMU OPS</span></td><td>1</td><td>18 KPIs</td><td style="color:var(--success)">100%</td><td style="color:var(--success)">✓ OK</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bottom-row">
+    <div class="chart-card">
+      <h3>GMV por Semana (R$)</h3>
+      <canvas id="chart-gmv" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>🎯 Metas do Mês</h3>
+      <div class="progress-list">
+        <div class="progress-item">
+          <div class="progress-header"><span class="progress-name">Creators Onboarded</span><span class="progress-pct">68%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span class="progress-name">Parcerias Ativas</span><span class="progress-pct">84%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span class="progress-name">GMV (R$1.5M meta)</span><span class="progress-pct">80%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span class="progress-name">Convites TAP</span><span class="progress-pct">92%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:92%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span class="progress-name">Amostras Aprovadas</span><span class="progress-pct">75%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span class="progress-name">Leads Comerciais</span><span class="progress-pct">40%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function tick() {
+  const t = new Date();
+  document.getElementById('sidebar-clock').textContent = t.toLocaleTimeString('pt-BR');
+  document.getElementById('header-date').textContent = t.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+}
+tick(); setInterval(tick, 1000);
+
+const CHART_OPTS = {
+  plugins: { legend: { labels: { color:'#8892A4', font:{size:11} } } },
+  scales: {
+    x: { ticks:{color:'#8892A4',font:{size:10}}, grid:{color:'rgba(255,255,255,0.05)'} },
+    y: { ticks:{color:'#8892A4',font:{size:10}}, grid:{color:'rgba(255,255,255,0.05)'} }
+  }
+};
+
+// Weekly runs chart
+const days = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+new Chart(document.getElementById('chart-week'), {
+  type: 'bar',
+  data: {
+    labels: days,
+    datasets: [
+      { label:'TAP Sales', data:[4,4,4,4,4,0,0], backgroundColor:'rgba(222,33,101,0.7)', borderRadius:4 },
+      { label:'OPS', data:[2,2,2,2,2,0,0], backgroundColor:'rgba(16,185,129,0.7)', borderRadius:4 },
+      { label:'Data', data:[1,1,1,1,1,0,0], backgroundColor:'rgba(96,165,250,0.7)', borderRadius:4 },
+      { label:'Comercial', data:[1,0,0,1,0,0,0], backgroundColor:'rgba(245,158,11,0.7)', borderRadius:4 },
+    ]
+  },
+  options: { ...CHART_OPTS, scales: { x:{ticks:{color:'#8892A4'}, grid:{color:'rgba(255,255,255,0.05)'},stacked:true}, y:{ticks:{color:'#8892A4'}, grid:{color:'rgba(255,255,255,0.05)'},stacked:true} } }
+});
+
+// Dept donut
+new Chart(document.getElementById('chart-dept'), {
+  type: 'doughnut',
+  data: {
+    labels: ['TAP Sales', 'CAP OPS', 'DATA', 'COMU OPS', 'COMERCIAL'],
+    datasets: [{ data:[4,1,1,2,1], backgroundColor:['#DE2165','#10B981','#60A5FA','#A78BFA','#F59E0B'], borderWidth:0, hoverOffset:6 }]
+  },
+  options: { plugins:{ legend:{ labels:{color:'#8892A4', font:{size:11}}, position:'bottom' } }, cutout:'65%' }
+});
+
+// GMV chart
+new Chart(document.getElementById('chart-gmv'), {
+  type: 'line',
+  data: {
+    labels: ['S1 Mar','S2 Mar','S3 Mar','S4 Mar','S1 Abr'],
+    datasets: [{
+      label: 'GMV R$',
+      data: [180000, 240000, 310000, 290000, 180000],
+      borderColor: '#DE2165',
+      backgroundColor: 'rgba(222,33,101,0.1)',
+      tension: 0.4, fill: true,
+      pointBackgroundColor: '#DE2165', pointRadius: 5,
+    }]
+  },
+  options: CHART_OPTS
+});
+</script>
+</body>
+</html>

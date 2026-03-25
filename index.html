@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COMU Hub 2.0 — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#0a0d14; color:#e2e8f0; height:100vh; display:flex; flex-direction:column; }
+
+/* Top bar */
+.topbar { background:#1D2035; border-bottom:2px solid #DE2165; padding:0 24px; height:56px; display:flex; align-items:center; gap:16px; flex-shrink:0; }
+.logo { font-size:22px; font-weight:800; color:#DE2165; letter-spacing:-1px; }
+.logo-sub { font-size:12px; color:#718096; margin-left:4px; }
+.live { margin-left:auto; font-size:12px; color:#48bb78; display:flex; align-items:center; gap:6px; }
+.dot { width:7px; height:7px; background:#48bb78; border-radius:50%; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* Layout */
+.layout { display:flex; flex:1; overflow:hidden; }
+
+/* Sidebar */
+.sidebar { width:220px; background:#1D2035; border-right:1px solid #2d3748; padding:16px 0; flex-shrink:0; overflow-y:auto; }
+.nav-section { padding:8px 16px; font-size:10px; color:#4a5568; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-top:8px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:13px; cursor:pointer; transition:all 0.2s; border-left:3px solid transparent; }
+.nav-item:hover { background:rgba(222,33,101,0.08); color:#e2e8f0; }
+.nav-item.active { background:rgba(222,33,101,0.12); color:#DE2165; border-left-color:#DE2165; font-weight:600; }
+.nav-item .icon { font-size:16px; width:20px; text-align:center; }
+.nav-badge { margin-left:auto; background:#DE2165; color:white; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; }
+
+/* Main content */
+.main { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.iframe-wrap { flex:1; }
+.iframe-wrap iframe { width:100%; height:100%; border:none; }
+
+/* Status bar */
+.statusbar { background:#1D2035; border-top:1px solid #2d3748; padding:6px 24px; display:flex; gap:24px; align-items:center; font-size:11px; color:#718096; flex-shrink:0; }
+.status-item { display:flex; align-items:center; gap:6px; }
+.status-ok { color:#48bb78; }
+.status-warn { color:#ed8936; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">COMU <span class="logo-sub">Hub 2.0</span></div>
+  <div style="font-size:13px;color:#a0aec0;">Command Center — Ecossistema de Agentes IA</div>
+  <div class="live"><div class="dot"></div> Sistema operacional</div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="loadPage('pages/comu-dashboard-executivo.html', this)">
+      <span class="icon">📊</span> Executivo
+    </div>
+    <div class="nav-item" onclick="loadPage('agents-office.html', this)">
+      <span class="icon">🏢</span> Virtual Office
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-feed.html', this)">
+      <span class="icon">⚡</span> Activity Feed
+    </div>
+
+    <div class="nav-section">Operações</div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-tap.html', this)">
+      <span class="icon">🎯</span> TAP Pipeline
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-cap.html', this)">
+      <span class="icon">🤝</span> CAP Parcerias
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-amostras.html', this)">
+      <span class="icon">💊</span> Amostras <span class="nav-badge">10.6k</span>
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-automacao.html', this)">
+      <span class="icon">🤖</span> Automação
+    </div>
+
+    <div class="nav-section">Análise</div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-gestao-ams.html', this)">
+      <span class="icon">👥</span> Gestão AMs
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-comercial.html', this)">
+      <span class="icon">💰</span> Comercial
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-funil.html', this)">
+      <span class="icon">📈</span> Funil TAP
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/comu-dashboard-cap-gestao.html', this)">
+      <span class="icon">⚙️</span> CAP Gestão
+    </div>
+
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" onclick="loadPage('pages/system-health.html', this)">
+      <span class="icon">🏥</span> System Health
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/cost-tracker.html', this)">
+      <span class="icon">💰</span> Cost Tracker
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/calendar.html', this)">
+      <span class="icon">📅</span> Calendar
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/docs.html', this)">
+      <span class="icon">📁</span> Docs
+    </div>
+    <div class="nav-item" onclick="loadPage('pages/settings.html', this)">
+      <span class="icon">⚙️</span> Settings
+    <div class='nav-item' onclick="loadPage('pages/memory.html', this)">
+      <span class='icon'>??</span> Memory & Journal
+    </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="iframe-wrap">
+      <iframe id="content" src="pages/comu-dashboard-executivo.html"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <div class="status-item"><span class="status-ok">●</span> Gateway: Online</div>
+  <div class="status-item"><span class="status-ok">●</span> 4/9 Agentes validados</div>
+  <div class="status-item"><span class="status-ok">●</span> Sheets: Conectado</div>
+  <div class="status-item"><span class="status-ok">●</span> Discord: Online</div>
+  <div class="status-item"><span class="status-warn">●</span> CHICO: Terça 02:00</div>
+  <div style="margin-left:auto">COMU Hub 2.0 • Clerio ⚡</div>
+</div>
+
+<script>
+function loadPage(url, el) {
+  document.getElementById('content').src = url;
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
+

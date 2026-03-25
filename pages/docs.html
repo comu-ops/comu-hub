@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COMU — Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;padding:24px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.header-left h1{font-size:24px;font-weight:800;color:#e2e8f0;}
+.header-left p{font-size:13px;color:#718096;margin-top:2px;}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.filter-label{font-size:12px;color:#718096;font-weight:600;margin-right:4px;}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid #2d3748;color:#a0aec0;background:transparent;}
+.filter-btn:hover{border-color:#DE2165;color:#DE2165;}
+.filter-btn.active{background:#DE2165;color:white;border-color:#DE2165;}
+.search-input{margin-left:auto;background:#1D2035;border:1px solid #2d3748;border-radius:8px;padding:7px 14px;color:#e2e8f0;font-size:13px;font-family:'Inter',sans-serif;outline:none;width:220px;}
+.search-input:focus{border-color:#DE2165;}
+.search-input::placeholder{color:#4a5568;}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-mini{background:#1D2035;border:1px solid #2d3748;border-radius:10px;padding:14px;text-align:center;}
+.stat-num{font-size:24px;font-weight:800;color:#DE2165;}
+.stat-label{font-size:11px;color:#718096;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* Doc sections */
+.agent-section{margin-bottom:24px;}
+.agent-section-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #1a1f2e;}
+.agent-section-header h2{font-size:16px;font-weight:700;}
+.doc-count{font-size:11px;color:#718096;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:10px;}
+
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.doc-card{background:#1D2035;border:1px solid #2d3748;border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block;}
+.doc-card:hover{border-color:#DE2165;transform:translateY(-2px);}
+.doc-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.doc-icon{font-size:24px;flex-shrink:0;}
+.doc-title{font-size:13px;font-weight:700;color:#e2e8f0;line-height:1.3;}
+.doc-date{font-size:11px;color:#718096;margin-top:2px;}
+.doc-meta{display:flex;gap:6px;flex-wrap:wrap;}
+.doc-tag{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:600;}
+.tag-sheets{background:rgba(72,187,120,0.15);color:#48bb78;}
+.tag-doc{background:rgba(66,153,225,0.15);color:#4299e1;}
+.tag-drive{background:rgba(237,137,54,0.15);color:#ed8936;}
+.tag-discord{background:rgba(159,122,234,0.15);color:#9f7aea;}
+.tag-new{background:rgba(222,33,101,0.2);color:#DE2165;}
+
+.doc-link{font-size:11px;color:#DE2165;margin-top:8px;display:flex;align-items:center;gap:4px;}
+.empty-state{text-align:center;padding:40px;color:#4a5568;font-size:14px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>📁 Documentos & Reports</h1>
+    <p>COMU AI Agents — Relatórios organizados por agente</p>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-mini">
+    <div class="stat-num">47</div>
+    <div class="stat-label">Total de Docs</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-num">12</div>
+    <div class="stat-label">Esta Semana</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-num">9</div>
+    <div class="stat-label">Agentes</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-num">5</div>
+    <div class="stat-label">Hoje</div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <span class="filter-label">Filtrar:</span>
+  <button class="filter-btn active" onclick="filterAgent('all', this)">Todos</button>
+  <button class="filter-btn" onclick="filterAgent('SEBASTIÃO', this)">📊 SEBASTIÃO</button>
+  <button class="filter-btn" onclick="filterAgent('GERALDO', this)">✅ GERALDO</button>
+  <button class="filter-btn" onclick="filterAgent('HUGO', this)">📈 HUGO</button>
+  <button class="filter-btn" onclick="filterAgent('CHICO', this)">🧹 CHICO</button>
+  <button class="filter-btn" onclick="filterAgent('OSVALDO', this)">⏰ OSVALDO</button>
+  <button class="filter-btn" onclick="filterAgent('VALDIR', this)">🔍 VALDIR</button>
+  <button class="filter-btn" onclick="filterAgent('TIAGO', this)">📨 TIAGO</button>
+  <input class="search-input" type="text" placeholder="🔍 Buscar documento..." oninput="searchDocs(this.value)">
+</div>
+
+<!-- Docs -->
+<div id="docs-container">
+
+  <!-- SEBASTIÃO -->
+  <div class="agent-section" data-agent="SEBASTIÃO">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">📊</span>
+      <h2>SEBASTIÃO — Dashboard Executivo</h2>
+      <span class="doc-count">8 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Relatório Executivo MCN — 24 Mar 2026</div><div class="doc-date">Hoje, 09:15</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Dashboard GMV — Semana 12/2026</div><div class="doc-date">23 Mar, 09:12</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Relatório Executivo MCN — 22 Mar 2026</div><div class="doc-date">22 Mar, 09:08</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">KPIs TikTok Shop — Mar 2026</div><div class="doc-date">21 Mar, 09:22</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Relatório Executivo MCN — 20 Mar 2026</div><div class="doc-date">20 Mar, 09:05</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Resumo Semanal — Semana 11/2026</div><div class="doc-date">16 Mar, 09:18</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- GERALDO -->
+  <div class="agent-section" data-agent="GERALDO">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">✅</span>
+      <h2>GERALDO — Aprovação de Amostras</h2>
+      <span class="doc-count">10 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Amostras Aprovadas — ALINE 24 Mar</div><div class="doc-date">Hoje, 15:30</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Amostras Aprovadas — CAROL 24 Mar</div><div class="doc-date">Hoje, 15:45</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Log Aprovações — Mar 2026</div><div class="doc-date">24 Mar, 16:00</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Relatório Semanal Amostras — Semana 12</div><div class="doc-date">21 Mar, 16:10</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Amostras Rejeitadas — Análise Mensal</div><div class="doc-date">19 Mar, 15:22</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Farol TAP por Marca — Histórico</div><div class="doc-date">15 Mar, 15:05</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- HUGO -->
+  <div class="agent-section" data-agent="HUGO">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">📈</span>
+      <h2>HUGO — Reports Google Sheets</h2>
+      <span class="doc-count">6 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Performance TAP — Semana 12/2026</div><div class="doc-date">Hoje, 16:02</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Análise GMV Creators — Mar 2026</div><div class="doc-date">20 Mar, 16:15</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Dashboard Conversão TAP — Semana 11</div><div class="doc-date">13 Mar, 16:08</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- OSVALDO -->
+  <div class="agent-section" data-agent="OSVALDO">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">⏰</span>
+      <h2>OSVALDO — Monitor Expiring</h2>
+      <span class="doc-count">7 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Renovações Urgentes — 24 Mar 2026</div><div class="doc-date">Hoje, 11:05</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Pipeline Renovações — Mar 2026</div><div class="doc-date">23 Mar, 11:12</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Creators Expirando — Semana 12</div><div class="doc-date">21 Mar, 11:08</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- CHICO -->
+  <div class="agent-section" data-agent="CHICO">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">🧹</span>
+      <h2>CHICO — Limpeza de Dados</h2>
+      <span class="doc-count">4 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Log Limpeza — 18 Mar 2026</div><div class="doc-date">18 Mar, 02:12</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Duplicatas Removidas — Mar 2026</div><div class="doc-date">11 Mar, 02:08</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Relatório Sanitização — Fev 2026</div><div class="doc-date">25 Fev, 02:15</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- VALDIR + TIAGO combined -->
+  <div class="agent-section" data-agent="VALDIR">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">🔍</span>
+      <h2>VALDIR — TAP Scouter</h2>
+      <span class="doc-count">5 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Novos Creators Prospectados — 24 Mar</div><div class="doc-date">Hoje, 12:08</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Pipeline TAP — Semana 12</div><div class="doc-date">23 Mar, 12:15</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Creators Similar Scorecard</div><div class="doc-date">20 Mar, 12:22</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="agent-section" data-agent="TIAGO">
+    <div class="agent-section-header">
+      <span style="font-size:20px;">📨</span>
+      <h2>TIAGO — TAP Sender</h2>
+      <span class="doc-count">4 docs</span>
+    </div>
+    <div class="docs-grid">
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📋</div><div><div class="doc-title">Envios TAP Realizados — 24 Mar</div><div class="doc-date">Hoje, 14:20</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-doc">Google Doc</span><span class="doc-tag tag-new">Novo</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+      <a class="doc-card" href="#" onclick="return false;">
+        <div class="doc-header"><div class="doc-icon">📊</div><div><div class="doc-title">Taxa de Conversão Convites — Mar 2026</div><div class="doc-date">23 Mar, 14:30</div></div></div>
+        <div class="doc-meta"><span class="doc-tag tag-sheets">Google Sheets</span></div>
+        <div class="doc-link">📎 Abrir no Drive →</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function filterAgent(agent, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.agent-section').forEach(sec => {
+    if(agent === 'all' || sec.dataset.agent === agent) {
+      sec.style.display = '';
+    } else {
+      sec.style.display = 'none';
+    }
+  });
+}
+
+function searchDocs(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.doc-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+  // Reset filter buttons
+  if(query.length > 0) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.agent-section').forEach(s => s.style.display = '');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COMU — Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0f1117;color:#e2e8f0;padding:24px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.header-left h1{font-size:24px;font-weight:800;color:#e2e8f0;}
+.header-left p{font-size:13px;color:#718096;margin-top:2px;}
+.badge{background:rgba(72,187,120,0.15);color:#48bb78;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+
+.top-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.card{background:#1D2035;border:1px solid #2d3748;border-radius:12px;padding:20px;}
+.card-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* Timeline */
+.timeline-card{background:#1D2035;border:1px solid #2d3748;border-radius:12px;padding:20px;margin-bottom:24px;}
+.timeline-wrap{overflow-x:auto;}
+.timeline{display:flex;flex-direction:column;gap:4px;min-width:900px;}
+.tl-header{display:grid;grid-template-columns:120px repeat(24,1fr);gap:0;margin-bottom:8px;}
+.tl-hour{font-size:10px;color:#4a5568;text-align:center;padding:2px 0;font-weight:600;}
+.tl-row{display:grid;grid-template-columns:120px repeat(24,1fr);gap:0;align-items:center;margin-bottom:2px;}
+.tl-agent{font-size:12px;font-weight:600;color:#a0aec0;padding:0 8px 0 0;}
+.tl-cell{height:28px;border-radius:4px;margin:1px;}
+.tl-block{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;cursor:pointer;transition:opacity 0.2s;}
+.tl-block:hover{opacity:0.8;}
+.tl-empty{background:rgba(255,255,255,0.02);border-radius:4px;}
+.tl-today-marker{background:rgba(222,33,101,0.06);}
+
+/* Days row */
+.days-wrap{display:flex;gap:4px;margin-bottom:16px;}
+.day-btn{flex:1;padding:6px;text-align:center;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;transition:all 0.2s;border:1px solid #2d3748;color:#718096;background:transparent;}
+.day-btn.active{background:#DE2165;color:white;border-color:#DE2165;}
+.day-btn.today{border-color:#DE2165;color:#DE2165;}
+.day-btn.weekend{opacity:0.4;}
+
+/* Agent schedule list */
+.schedule-list{display:flex;flex-direction:column;gap:8px;}
+.sched-item{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid #1a1f2e;}
+.sched-time{font-size:18px;font-weight:800;color:#DE2165;min-width:48px;}
+.sched-emoji{font-size:22px;}
+.sched-info{flex:1;}
+.sched-info h4{font-size:13px;font-weight:700;}
+.sched-info p{font-size:11px;color:#718096;margin-top:2px;}
+.sched-days{display:flex;gap:4px;margin-top:4px;}
+.day-tag{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600;}
+.day-on{background:rgba(222,33,101,0.2);color:#DE2165;}
+.day-off{background:rgba(113,128,150,0.1);color:#4a5568;}
+.sched-status{text-align:right;}
+.status-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;}
+.st-done{background:rgba(66,153,225,0.15);color:#4299e1;}
+.st-pending{background:rgba(237,137,54,0.15);color:#ed8936;}
+.st-idle{background:rgba(113,128,150,0.12);color:#718096;}
+.st-next{background:rgba(222,33,101,0.15);color:#DE2165;}
+
+.next-runs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.next-card{background:rgba(222,33,101,0.05);border:1px solid rgba(222,33,101,0.2);border-radius:10px;padding:14px;}
+.next-time{font-size:22px;font-weight:800;color:#DE2165;}
+.next-agent{font-size:13px;font-weight:700;margin-top:4px;}
+.next-label{font-size:11px;color:#718096;}
+.countdown{font-size:12px;color:#ed8936;margin-top:4px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>📅 Cron Calendar</h1>
+    <p>COMU AI Agents — Agenda de execuções automatizadas</p>
+  </div>
+  <div class="badge" id="clockBadge">🕐 Carregando...</div>
+</div>
+
+<!-- Day selector -->
+<div class="days-wrap">
+  <div class="day-btn" data-day="0" onclick="selectDay(0)">Dom</div>
+  <div class="day-btn" data-day="1" onclick="selectDay(1)">Seg</div>
+  <div class="day-btn" data-day="2" onclick="selectDay(2)">Ter</div>
+  <div class="day-btn" data-day="3" onclick="selectDay(3)">Qua</div>
+  <div class="day-btn" data-day="4" onclick="selectDay(4)">Qui</div>
+  <div class="day-btn" data-day="5" onclick="selectDay(5)">Sex</div>
+  <div class="day-btn weekend" data-day="6" onclick="selectDay(6)">Sáb</div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline-card">
+  <div class="card-title">⏱️ Timeline do Dia — Execuções por Hora</div>
+  <div class="timeline-wrap">
+    <div class="timeline" id="timeline"><!-- populated by JS --></div>
+  </div>
+</div>
+
+<div class="top-row">
+  <!-- Full schedule list -->
+  <div class="card">
+    <div class="card-title">🗓️ Agenda Completa dos Agentes</div>
+    <div class="schedule-list">
+      <div class="sched-item">
+        <div class="sched-time">09h</div>
+        <div class="sched-emoji">📊</div>
+        <div class="sched-info">
+          <h4>SEBASTIÃO</h4>
+          <p>Dashboard executivo — relatório diário</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-done">✓ Executado</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">10h</div>
+        <div class="sched-emoji">🔎</div>
+        <div class="sched-info">
+          <h4>JERÔNIMO</h4>
+          <p>Monitoramento de feeds e notícias</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-done">✓ Executado</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">11h</div>
+        <div class="sched-emoji">⏰</div>
+        <div class="sched-info">
+          <h4>OSVALDO</h4>
+          <p>Monitor de creators expirando (7 dias)</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-done">✓ Executado</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">12h</div>
+        <div class="sched-emoji">🔍</div>
+        <div class="sched-info">
+          <h4>VALDIR</h4>
+          <p>TAP Scouter — prospecta novos creators</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-idle">— Aguardando</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">13h</div>
+        <div class="sched-emoji">📬</div>
+        <div class="sched-info">
+          <h4>APARECIDO</h4>
+          <p>Mensageiro TAP — envia invites</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-idle">— Aguardando</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">14h</div>
+        <div class="sched-emoji">📨</div>
+        <div class="sched-info">
+          <h4>TIAGO</h4>
+          <p>TAP Sender universal — processa fila</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-idle">— Aguardando</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">15h</div>
+        <div class="sched-emoji">✅</div>
+        <div class="sched-info">
+          <h4>GERALDO</h4>
+          <p>Aprovação de amostras — Seg a Sex</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-on">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-on">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-next">▶ Próximo</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">16h</div>
+        <div class="sched-emoji">📈</div>
+        <div class="sched-info">
+          <h4>HUGO</h4>
+          <p>Reports Google Sheets — Segunda e Quinta</p>
+          <div class="sched-days">
+            <span class="day-tag day-on">Seg</span><span class="day-tag day-off">Ter</span><span class="day-tag day-off">Qua</span><span class="day-tag day-on">Qui</span><span class="day-tag day-off">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-idle">— Aguardando</span></div>
+      </div>
+
+      <div class="sched-item">
+        <div class="sched-time">02h</div>
+        <div class="sched-emoji">🧹</div>
+        <div class="sched-info">
+          <h4>CHICO</h4>
+          <p>Limpeza de dados — somente Terças</p>
+          <div class="sched-days">
+            <span class="day-tag day-off">Seg</span><span class="day-tag day-on">Ter</span><span class="day-tag day-off">Qua</span><span class="day-tag day-off">Qui</span><span class="day-tag day-off">Sex</span><span class="day-tag day-off">Sáb</span><span class="day-tag day-off">Dom</span>
+          </div>
+        </div>
+        <div class="sched-status"><span class="status-pill st-idle">— Aguardando</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next runs -->
+  <div class="card">
+    <div class="card-title">🔜 Próximas Execuções</div>
+    <div class="next-runs" id="nextRuns">
+      <div class="next-card">
+        <div class="next-time">15h00</div>
+        <div class="next-agent">✅ GERALDO</div>
+        <div class="next-label">Aprovação amostras</div>
+        <div class="countdown" id="cd1">Calculando...</div>
+      </div>
+      <div class="next-card">
+        <div class="next-time">16h00</div>
+        <div class="next-agent">📈 HUGO</div>
+        <div class="next-label">Reports Sheets</div>
+        <div class="countdown" id="cd2">Calculando...</div>
+      </div>
+      <div class="next-card">
+        <div class="next-time">Terça 02h</div>
+        <div class="next-agent">🧹 CHICO</div>
+        <div class="next-label">Limpeza de dados</div>
+        <div class="countdown" id="cd3">Calculando...</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="card-title">📋 Resumo da Semana</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left;font-size:11px;color:#718096;padding:6px 8px;text-transform:uppercase;letter-spacing:0.5px;background:#0f1117;">Agente</th>
+            <th style="text-align:center;font-size:11px;color:#718096;padding:6px 8px;text-transform:uppercase;background:#0f1117;">Runs/semana</th>
+            <th style="text-align:center;font-size:11px;color:#718096;padding:6px 8px;text-transform:uppercase;background:#0f1117;">Cron</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">📊 SEBASTIÃO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 9 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">🔎 JERÔNIMO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 10 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">⏰ OSVALDO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 11 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">🔍 VALDIR</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 12 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">📬 APARECIDO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 13 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">📨 TIAGO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 14 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">✅ GERALDO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">5x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 15 * * 1-5</td></tr>
+          <tr><td style="padding:8px;font-size:12px;border-bottom:1px solid #1a1f2e;">📈 HUGO</td><td style="text-align:center;font-size:12px;border-bottom:1px solid #1a1f2e;">2x</td><td style="text-align:center;font-size:11px;color:#718096;border-bottom:1px solid #1a1f2e;">0 16 * * 1,4</td></tr>
+          <tr><td style="padding:8px;font-size:12px;">🧹 CHICO</td><td style="text-align:center;font-size:12px;">1x</td><td style="text-align:center;font-size:11px;color:#718096;">0 2 * * 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const agents = [
+  { name:'SEBASTIÃO', emoji:'📊', color:'#4299e1', hours:[9], days:[1,2,3,4,5] },
+  { name:'JERÔNIMO',  emoji:'🔎', color:'#63b3ed', hours:[10], days:[1,2,3,4,5] },
+  { name:'OSVALDO',   emoji:'⏰', color:'#DE2165', hours:[11], days:[1,2,3,4,5] },
+  { name:'VALDIR',    emoji:'🔍', color:'#9f7aea', hours:[12], days:[1,2,3,4,5] },
+  { name:'APARECIDO', emoji:'📬', color:'#ed8936', hours:[13], days:[1,2,3,4,5] },
+  { name:'TIAGO',     emoji:'📨', color:'#48bb78', hours:[14], days:[1,2,3,4,5] },
+  { name:'GERALDO',   emoji:'✅', color:'#e05388', hours:[15], days:[1,2,3,4,5] },
+  { name:'HUGO',      emoji:'📈', color:'#68d391', hours:[16], days:[1,4] },
+  { name:'CHICO',     emoji:'🧹', color:'#76e4f7', hours:[2],  days:[2] },
+];
+
+const now = new Date();
+const todayDay = now.getDay();
+const todayHour = now.getHours();
+
+// Highlight today's day button
+document.querySelectorAll('.day-btn').forEach(btn => {
+  if(parseInt(btn.dataset.day) === todayDay) {
+    btn.classList.add('today');
+    btn.classList.add('active');
+  }
+});
+
+// Update clock badge
+function updateClock() {
+  const t = new Date();
+  document.getElementById('clockBadge').textContent = '🕐 ' + t.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Render timeline
+function renderTimeline(day) {
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'tl-header';
+  header.innerHTML = '<div></div>';
+  for(let h=0;h<24;h++) {
+    const el = document.createElement('div');
+    el.className = 'tl-hour';
+    el.textContent = h<10?'0'+h+'h':h+'h';
+    header.appendChild(el);
+  }
+  tl.appendChild(header);
+
+  agents.forEach(agent => {
+    const row = document.createElement('div');
+    row.className = 'tl-row';
+
+    const label = document.createElement('div');
+    label.className = 'tl-agent';
+    label.textContent = agent.emoji + ' ' + agent.name;
+    row.appendChild(label);
+
+    for(let h=0;h<24;h++) {
+      const cell = document.createElement('div');
+      if(agent.hours.includes(h) && agent.days.includes(day)) {
+        cell.className = 'tl-block';
+        cell.style.background = agent.color;
+        cell.textContent = h+'h';
+        cell.title = agent.name + ' @ ' + h + ':00';
+        if(h === todayHour && day === todayDay) {
+          cell.style.boxShadow = '0 0 8px ' + agent.color;
+        }
+      } else {
+        cell.className = 'tl-empty';
+        if(h === todayHour && day === todayDay) {
+          cell.style.background = 'rgba(222,33,101,0.05)';
+        }
+      }
+      row.appendChild(cell);
+    }
+    tl.appendChild(row);
+  });
+}
+
+function selectDay(day) {
+  document.querySelectorAll('.day-btn').forEach(b => {
+    b.classList.remove('active');
+    if(parseInt(b.dataset.day) === day) b.classList.add('active');
+  });
+  renderTimeline(day);
+}
+
+renderTimeline(todayDay === 0 || todayDay === 6 ? 1 : todayDay);
+
+// Countdown helpers
+function msUntilNextRun(targetHour, targetDays) {
+  const n = new Date();
+  for(let i=0;i<8;i++) {
+    const d = new Date(n);
+    d.setDate(d.getDate()+i);
+    d.setHours(targetHour,0,0,0);
+    if(d > n && (targetDays.includes(d.getDay())||targetDays.length===0)) {
+      return d - n;
+    }
+  }
+  return null;
+}
+
+function formatMs(ms) {
+  if(!ms) return '—';
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  if(h>24) return Math.floor(h/24)+'d '+( h%24)+'h';
+  return h+'h '+m+'min';
+}
+
+function updateCountdowns() {
+  document.getElementById('cd1').textContent = 'em ' + formatMs(msUntilNextRun(15,[1,2,3,4,5]));
+  document.getElementById('cd2').textContent = 'em ' + formatMs(msUntilNextRun(16,[1,4]));
+  document.getElementById('cd3').textContent = 'em ' + formatMs(msUntilNextRun(2,[2]));
+}
+updateCountdowns();
+setInterval(updateCountdowns, 60000);
+</script>
+</body>
+</html>

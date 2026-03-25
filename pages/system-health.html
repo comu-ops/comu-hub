@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Health</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#0a0d14; color:#e2e8f0; padding:24px; overflow-y:auto; }
+
+h1 { font-size:20px; font-weight:700; color:#e2e8f0; margin-bottom:4px; }
+.subtitle { font-size:13px; color:#718096; margin-bottom:24px; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
+
+.card { background:#1D2035; border:1px solid #2d3748; border-radius:10px; padding:20px; }
+.card-title { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#718096; font-weight:700; margin-bottom:12px; }
+
+/* Status badge */
+.badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-ok { background:rgba(72,187,120,0.15); color:#48bb78; }
+.badge-warn { background:rgba(237,137,54,0.15); color:#ed8936; }
+.badge-err { background:rgba(222,33,101,0.15); color:#DE2165; }
+.dot { width:7px; height:7px; border-radius:50%; animation:pulse 1.5s infinite; }
+.dot-ok { background:#48bb78; }
+.dot-warn { background:#ed8936; }
+.dot-err { background:#DE2165; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* Gateway card */
+.gateway-status { font-size:32px; font-weight:800; color:#48bb78; margin:8px 0 4px; }
+.gateway-meta { font-size:12px; color:#718096; }
+
+/* Agents table */
+table { width:100%; border-collapse:collapse; }
+th { font-size:11px; color:#4a5568; text-transform:uppercase; letter-spacing:0.5px; padding:8px 12px; text-align:left; border-bottom:1px solid #2d3748; }
+td { padding:10px 12px; font-size:13px; border-bottom:1px solid #1a1f35; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+.agent-name { font-weight:600; color:#e2e8f0; }
+.agent-desc { font-size:11px; color:#718096; }
+
+/* Custo */
+.custo-total { font-size:28px; font-weight:800; color:#e2e8f0; margin:8px 0; }
+.custo-bar-wrap { background:#2d3748; border-radius:4px; height:8px; margin:8px 0; overflow:hidden; }
+.custo-bar { height:100%; border-radius:4px; background:linear-gradient(90deg,#48bb78,#68d391); transition:width 0.5s; }
+.custo-bar.warn { background:linear-gradient(90deg,#ed8936,#f6ad55); }
+.custo-breakdown { display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.custo-row { display:flex; justify-content:space-between; font-size:12px; color:#a0aec0; }
+.custo-val { color:#e2e8f0; font-weight:600; }
+
+/* NOX log */
+.nox-list { display:flex; flex-direction:column; gap:8px; }
+.nox-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:#0a0d14; border-radius:6px; font-size:12px; }
+.nox-time { color:#718096; width:140px; flex-shrink:0; }
+.nox-status { flex:1; }
+
+/* Doctor button */
+.btn-doctor { display:flex; align-items:center; gap:10px; background:#DE2165; color:white; border:none; padding:14px 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; width:100%; margin-top:8px; transition:opacity 0.2s; }
+.btn-doctor:hover { opacity:0.85; }
+.btn-doctor .icon { font-size:20px; }
+.cmd { background:#0a0d14; border-radius:6px; padding:10px 14px; font-family:monospace; font-size:12px; color:#a0aec0; margin-top:10px; word-break:break-all; }
+.copied { color:#48bb78; font-size:12px; margin-top:6px; display:none; }
+
+.section-title { font-size:15px; font-weight:700; color:#e2e8f0; margin:24px 0 12px; border-left:3px solid #DE2165; padding-left:10px; }
+</style>
+</head>
+<body>
+
+<h1>🏥 System Health</h1>
+<div class="subtitle">Status em tempo real da operação COMU — atualizado a cada carregamento</div>
+
+<div class="grid">
+
+  <!-- Gateway -->
+  <div class="card">
+    <div class="card-title">🌐 Gateway OpenClaw</div>
+    <div class="gateway-status" id="gw-status">⟳</div>
+    <div class="gateway-meta" id="gw-meta">Verificando...</div>
+    <div style="margin-top:12px" id="gw-badge"></div>
+  </div>
+
+  <!-- Custo do dia -->
+  <div class="card">
+    <div class="card-title">💰 Custo do Dia</div>
+    <div class="custo-total" id="custo-total">$—</div>
+    <div class="custo-bar-wrap"><div class="custo-bar" id="custo-bar" style="width:0%"></div></div>
+    <div style="font-size:11px;color:#718096" id="custo-limite">de $30.00 limite diário</div>
+    <div class="custo-breakdown" id="custo-breakdown"></div>
+  </div>
+
+  <!-- Doctor -->
+  <div class="card">
+    <div class="card-title">🔧 Diagnóstico Rápido</div>
+    <p style="font-size:13px;color:#a0aec0;margin-bottom:12px;">Execute o doctor para verificar e corrigir configurações automaticamente.</p>
+    <button class="btn-doctor" onclick="copyDoctor()">
+      <span class="icon">⚕️</span> Copiar comando Doctor
+    </button>
+    <div class="cmd">node "C:\Users\usuario\AppData\Roaming\npm\node_modules\openclaw\openclaw.mjs" doctor --fix</div>
+    <div class="copied" id="copied-msg">✅ Copiado! Cole no terminal.</div>
+  </div>
+
+</div>
+
+<!-- Agentes -->
+<div class="section-title">🤖 Status dos Agentes</div>
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Agente</th>
+        <th>Missão</th>
+        <th>Schedule</th>
+        <th>Último Run</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="agents-tbody">
+      <tr><td colspan="5" style="color:#718096;text-align:center;padding:20px">Carregando...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- NOX History -->
+<div class="section-title">🛡️ NOX — Histórico de Health Checks</div>
+<div class="card">
+  <div class="nox-list" id="nox-list">
+    <div style="color:#718096;font-size:13px">Carregando histórico...</div>
+  </div>
+</div>
+
+<script>
+// ---- AGENTES CONFIG ----
+const AGENTES = [
+  { nome:'SEBASTIÃO', missao:'Coleta TAP+MCN', schedule:'Diário 9h seg-sáb', validado:true },
+  { nome:'CHICO',     missao:'KPI Semanal AMs', schedule:'Terças 02h', validado:true },
+  { nome:'GERALDO',   missao:'Aprovação Amostras', schedule:'Seg-Sex 15h', validado:true },
+  { nome:'OSVALDO',   missao:'Renovação Parcerias', schedule:'Diário 11h', validado:false },
+  { nome:'TIAGO',     missao:'Envio TAP Creators', schedule:'Diário 14h', validado:false },
+  { nome:'VALDIR',    missao:'Export Handles Reacher', schedule:'Diário 12h', validado:false },
+  { nome:'JERÔNIMO',  missao:'Tracker Convites TAP', schedule:'Diário 10h', validado:false },
+  { nome:'APARECIDO', missao:'Top Creators GMV', schedule:'Diário 13h', validado:false },
+  { nome:'HUGO',      missao:'Prospecção Comercial', schedule:'Seg+Qui 16h', validado:false },
+  { nome:'NOX',       missao:'Health Check Sistema', schedule:'A cada 15min', validado:true },
+];
+
+function fmt(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+
+// Gateway status
+fetch('http://127.0.0.1:18789/', {mode:'no-cors'})
+  .then(() => {
+    document.getElementById('gw-status').textContent = 'ONLINE';
+    document.getElementById('gw-status').style.color = '#48bb78';
+    document.getElementById('gw-meta').textContent = 'Porta 18789 respondendo';
+    document.getElementById('gw-badge').innerHTML = '<span class="badge badge-ok"><span class="dot dot-ok"></span> Operacional</span>';
+  })
+  .catch(() => {
+    document.getElementById('gw-status').textContent = 'OFFLINE';
+    document.getElementById('gw-status').style.color = '#DE2165';
+    document.getElementById('gw-meta').textContent = 'Gateway não responde';
+    document.getElementById('gw-badge').innerHTML = '<span class="badge badge-err"><span class="dot dot-err"></span> Inativo</span>';
+  });
+
+// Agentes
+const tbody = document.getElementById('agents-tbody');
+tbody.innerHTML = AGENTES.map(a => `
+  <tr>
+    <td><div class="agent-name">${a.nome}</div></td>
+    <td><div class="agent-desc">${a.missao}</div></td>
+    <td style="font-size:12px;color:#718096">${a.schedule}</td>
+    <td style="font-size:12px;color:#718096">—</td>
+    <td>${a.validado
+      ? '<span class="badge badge-ok">✅ Validado</span>'
+      : '<span class="badge badge-warn">⏳ Pendente</span>'}</td>
+  </tr>`).join('');
+
+// Custo
+const custoDia = 8.54;
+const limite = 30;
+const pct = Math.min((custoDia/limite)*100, 100);
+document.getElementById('custo-total').textContent = '$' + custoDia.toFixed(2);
+const bar = document.getElementById('custo-bar');
+bar.style.width = pct + '%';
+if (pct > 70) bar.classList.add('warn');
+document.getElementById('custo-breakdown').innerHTML = `
+  <div class="custo-row"><span>Agentes</span><span class="custo-val">$1.04</span></div>
+  <div class="custo-row"><span>Chat / Sessões</span><span class="custo-val">$7.50</span></div>
+  <div class="custo-row"><span>NOX (96 runs)</span><span class="custo-val">$0.26</span></div>
+`;
+
+// NOX history
+const noxData = [
+  {"timestamp":"2026-03-25T04:27:47.433Z","gateway":"online","config":"ok","issues":[]},
+  {"timestamp":"2026-03-25T03:08:46.283Z","gateway":"online","config":"ok","issues":[]},
+  {"timestamp":"2026-03-25T02:43:42.658Z","gateway":"online","config":"ok","issues":[]},
+  {"timestamp":"2026-03-25T01:53:14.941Z","gateway":"online","config":"ok","issues":[]},
+  {"timestamp":"2026-03-25T01:36:07.351Z","gateway":"online","config":"ok","issues":[]}
+];
+
+document.getElementById('nox-list').innerHTML = noxData.map(n => `
+  <div class="nox-item">
+    <span class="nox-time">${fmt(n.timestamp)}</span>
+    <span class="nox-status">
+      ${n.issues.length === 0
+        ? '<span class="badge badge-ok">✅ Sistema saudável</span>'
+        : '<span class="badge badge-err">⚠️ ' + n.issues.join(', ') + '</span>'}
+    </span>
+    <span style="font-size:11px;color:#4a5568">gateway: ${n.gateway} | config: ${n.config}</span>
+  </div>`).join('');
+
+function copyDoctor() {
+  const cmd = 'node "C:\\Users\\usuario\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs" doctor --fix';
+  navigator.clipboard.writeText(cmd).then(() => {
+    document.getElementById('copied-msg').style.display = 'block';
+    setTimeout(() => document.getElementById('copied-msg').style.display = 'none', 3000);
+  });
+}
+</script>
+</body>
+</html>

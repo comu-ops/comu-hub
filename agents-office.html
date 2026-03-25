@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>COMU — Virtual Agent Office</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#0a0d14; color:#e2e8f0; overflow:hidden; height:100vh; }
+
+/* Header */
+.hdr { background:#1D2035; border-bottom:2px solid #DE2165; padding:12px 24px; display:flex; align-items:center; gap:16px; z-index:10; position:relative; }
+.logo { font-size:22px; font-weight:800; color:#DE2165; }
+.hdr-title { font-size:16px; font-weight:600; }
+.live { margin-left:auto; font-size:12px; color:#48bb78; display:flex; align-items:center; gap:6px; }
+.dot { width:8px; height:8px; background:#48bb78; border-radius:50%; animation:blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* Office container */
+.office-wrap { position:relative; width:100%; height:calc(100vh - 56px); overflow:auto; background:#111827; }
+
+/* Floor */
+.floor { position:relative; width:1400px; height:900px; margin:20px auto;
+  background: repeating-linear-gradient(0deg, transparent, transparent 59px, #1a1f2e 59px, #1a1f2e 60px),
+              repeating-linear-gradient(90deg, transparent, transparent 59px, #1a1f2e 59px, #1a1f2e 60px);
+  background-color: #0f1420;
+  border-radius:24px; border:2px solid #1D2035; overflow:hidden; }
+
+/* Room areas */
+.room { position:absolute; border-radius:12px; padding:8px 12px; }
+.room-data { background:rgba(66,153,225,0.05); border:1px dashed rgba(66,153,225,0.2); top:20px; left:20px; width:260px; height:420px; }
+.room-tap { background:rgba(72,187,120,0.05); border:1px dashed rgba(72,187,120,0.2); top:20px; left:300px; width:720px; height:420px; }
+.room-cap { background:rgba(237,137,54,0.05); border:1px dashed rgba(237,137,54,0.2); top:460px; left:20px; width:260px; height:200px; }
+.room-comercial { background:rgba(222,33,101,0.05); border:1px dashed rgba(222,33,101,0.2); top:460px; left:300px; width:220px; height:200px; }
+.room-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; opacity:0.5; margin-bottom:4px; }
+.room-data .room-label { color:#4299e1; }
+.room-tap .room-label { color:#48bb78; }
+.room-cap .room-label { color:#ed8936; }
+.room-comercial .room-label { color:#DE2165; }
+
+/* Desk */
+.desk { position:absolute; cursor:pointer; }
+.desk-body { width:90px; height:70px; background:#1D2035; border:2px solid #2d3748; border-radius:8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  transition:all 0.3s; position:relative; }
+.desk:hover .desk-body { border-color:#DE2165; transform:scale(1.05); z-index:10; }
+.desk-body.working { border-color:#48bb78; box-shadow:0 0 20px rgba(72,187,120,0.3); }
+.desk-body.done { border-color:#4299e1; }
+.desk-body.idle { border-color:#4a5568; }
+.desk-body.pending { border-color:#ed8936; }
+
+/* Character */
+.char { font-size:28px; line-height:1; }
+.agent-name { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+.agent-status-dot { position:absolute; top:-4px; right:-4px; width:12px; height:12px; border-radius:50%; border:2px solid #0f1420; }
+.working .agent-status-dot { background:#48bb78; animation:blink 1s infinite; }
+.done .agent-status-dot { background:#4299e1; }
+.idle .agent-status-dot { background:#718096; }
+.pending .agent-status-dot { background:#ed8936; }
+
+/* Monitor on desk */
+.monitor { position:absolute; top:-30px; left:50%; transform:translateX(-50%);
+  width:50px; height:26px; background:#0a0d14; border:2px solid #2d3748; border-radius:4px;
+  display:flex; align-items:center; justify-content:center; font-size:14px; }
+.monitor::after { content:''; position:absolute; bottom:-8px; width:10px; height:6px; background:#2d3748; border-radius:0 0 2px 2px; }
+
+/* Working animation overlay */
+.working-glow { position:absolute; inset:-4px; border-radius:12px; animation:glow 2s infinite; pointer-events:none; }
+@keyframes glow { 0%,100%{box-shadow:0 0 10px rgba(72,187,120,0.2)}50%{box-shadow:0 0 25px rgba(72,187,120,0.5)} }
+
+/* Tooltip */
+.tooltip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+  background:#1D2035; border:1px solid #2d3748; border-radius:8px; padding:10px; width:200px;
+  font-size:11px; z-index:100; display:none; }
+.desk:hover .tooltip { display:block; }
+.tooltip h4 { font-size:13px; font-weight:700; margin-bottom:6px; }
+.tooltip-row { display:flex; justify-content:space-between; padding:2px 0; border-bottom:1px solid #2d3748; }
+.tooltip-row:last-child { border:none; }
+.tooltip-val { color:#DE2165; font-weight:600; }
+
+/* Pipeline arrows */
+svg.pipes { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+
+/* Activity ticker at bottom */
+.ticker { position:fixed; bottom:0; left:0; right:0; background:#1D2035; border-top:1px solid #2d3748;
+  padding:8px 24px; display:flex; gap:24px; overflow:hidden; height:36px; align-items:center; }
+.ticker-label { font-size:11px; color:#DE2165; font-weight:700; white-space:nowrap; }
+.ticker-content { font-size:11px; color:#a0aec0; white-space:nowrap; animation:scroll 30s linear infinite; }
+@keyframes scroll { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">COMU</div>
+  <div class="hdr-title">🏢 Virtual Agent Office — Escritório ao Vivo</div>
+  <div class="live"><div class="dot"></div> 9 agentes online • Hoje: 4 concluídos</div>
+</div>
+
+<div class="office-wrap">
+  <div class="floor" id="floor">
+
+    <!-- Room labels -->
+    <div class="room room-data"><div class="room-label">📊 DATA</div></div>
+    <div class="room room-tap"><div class="room-label">🎯 TAP OPS — Pipeline</div></div>
+    <div class="room room-cap"><div class="room-label">🤝 CAP OPS</div></div>
+    <div class="room room-comercial"><div class="room-label">💰 Comercial</div></div>
+
+    <!-- SVG Arrows -->
+    <svg class="pipes" viewBox="0 0 1400 900">
+      <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L6,3 z" fill="rgba(72,187,120,0.4)"/>
+      </marker></defs>
+      <!-- SEBASTIÃO → VALDIR -->
+      <path d="M 285 140 Q 350 140 390 140" stroke="rgba(72,187,120,0.3)" stroke-width="2" fill="none" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+      <!-- VALDIR → TIAGO -->
+      <path d="M 490 140 Q 550 140 600 140" stroke="rgba(72,187,120,0.3)" stroke-width="2" fill="none" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+      <!-- APARECIDO → TIAGO -->
+      <path d="M 490 280 Q 545 210 600 180" stroke="rgba(72,187,120,0.3)" stroke-width="2" fill="none" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+      <!-- TIAGO → JERÔNIMO -->
+      <path d="M 700 140 Q 790 140 840 140" stroke="rgba(72,187,120,0.3)" stroke-width="2" fill="none" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+    </svg>
+
+    <!-- SEBASTIÃO -->
+    <div class="desk" style="left:80px;top:100px">
+      <div class="monitor">📊</div>
+      <div class="desk-body done">
+        <div class="agent-status-dot"></div>
+        <div class="char">👨‍💻</div>
+        <div class="agent-name" style="color:#4299e1">SEBASTIÃO</div>
+        <div class="tooltip">
+          <h4>📊 SEBASTIÃO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">✅ Concluído</span></div>
+          <div class="tooltip-row"><span>GMV coletado</span><span class="tooltip-val">R$54.3M</span></div>
+          <div class="tooltip-row"><span>Última exec</span><span class="tooltip-val">09:47</span></div>
+          <div class="tooltip-row"><span>Próxima</span><span class="tooltip-val">Amanhã 09:00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JERÔNIMO -->
+    <div class="desk" style="left:840px;top:100px">
+      <div class="monitor">🔍</div>
+      <div class="desk-body pending">
+        <div class="agent-status-dot"></div>
+        <div class="char">🧑‍🔬</div>
+        <div class="agent-name" style="color:#ed8936">JERÔNIMO</div>
+        <div class="tooltip">
+          <h4>🔍 JERÔNIMO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">⏳ Aguardando</span></div>
+          <div class="tooltip-row"><span>Função</span><span class="tooltip-val">Collector PC</span></div>
+          <div class="tooltip-row"><span>Depende de</span><span class="tooltip-val">TIAGO</span></div>
+          <div class="tooltip-row"><span>Schedule</span><span class="tooltip-val">10:00 diário</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VALDIR -->
+    <div class="desk" style="left:390px;top:100px">
+      <div class="monitor">🎯</div>
+      <div class="desk-body idle">
+        <div class="agent-status-dot"></div>
+        <div class="char">👩‍💼</div>
+        <div class="agent-name" style="color:#718096">VALDIR</div>
+        <div class="tooltip">
+          <h4>🎯 VALDIR</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">💤 Aguardando</span></div>
+          <div class="tooltip-row"><span>Portal</span><span class="tooltip-val">Reacher</span></div>
+          <div class="tooltip-row"><span>Schedule</span><span class="tooltip-val">12:00 diário</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APARECIDO -->
+    <div class="desk" style="left:390px;top:250px">
+      <div class="monitor">🏪</div>
+      <div class="desk-body idle">
+        <div class="agent-status-dot"></div>
+        <div class="char">🧑‍🏭</div>
+        <div class="agent-name" style="color:#718096">APARECIDO</div>
+        <div class="tooltip">
+          <h4>🏪 APARECIDO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">💤 Aguardando</span></div>
+          <div class="tooltip-row"><span>Função</span><span class="tooltip-val">Seller Center</span></div>
+          <div class="tooltip-row"><span>Schedule</span><span class="tooltip-val">13:00 diário</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIAGO -->
+    <div class="desk" style="left:600px;top:100px">
+      <div class="monitor">📤</div>
+      <div class="desk-body idle">
+        <div class="agent-status-dot"></div>
+        <div class="char">👨‍💬</div>
+        <div class="agent-name" style="color:#718096">TIAGO</div>
+        <div class="tooltip">
+          <h4>📤 TIAGO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">💤 Aguardando</span></div>
+          <div class="tooltip-row"><span>Função</span><span class="tooltip-val">Sender mensagens</span></div>
+          <div class="tooltip-row"><span>Schedule</span><span class="tooltip-val">14:00 diário</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OSVALDO -->
+    <div class="desk" style="left:80px;top:480px">
+      <div class="monitor">🤝</div>
+      <div class="desk-body done">
+        <div class="agent-status-dot"></div>
+        <div class="char">👨‍⚖️</div>
+        <div class="agent-name" style="color:#4299e1">OSVALDO</div>
+        <div class="tooltip">
+          <h4>🤝 OSVALDO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">✅ Concluído</span></div>
+          <div class="tooltip-row"><span>Extends</span><span class="tooltip-val">179</span></div>
+          <div class="tooltip-row"><span>Unlinks</span><span class="tooltip-val">12 declinados</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GERALDO -->
+    <div class="desk" style="left:80px;top:610px">
+      <div class="monitor">💊</div>
+      <div class="desk-body done">
+        <div class="agent-status-dot"></div>
+        <div class="char">👩‍⚕️</div>
+        <div class="agent-name" style="color:#4299e1">GERALDO</div>
+        <div class="tooltip">
+          <h4>💊 GERALDO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">✅ Concluído</span></div>
+          <div class="tooltip-row"><span>Aprovações</span><span class="tooltip-val">35</span></div>
+          <div class="tooltip-row"><span>Na fila</span><span class="tooltip-val">10.658</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUGO -->
+    <div class="desk" style="left:340px;top:510px">
+      <div class="monitor">💰</div>
+      <div class="desk-body done">
+        <div class="agent-status-dot"></div>
+        <div class="char">🕵️</div>
+        <div class="agent-name" style="color:#4299e1">HUGO</div>
+        <div class="tooltip">
+          <h4>💰 HUGO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">✅ Concluído</span></div>
+          <div class="tooltip-row"><span>Oportunidades</span><span class="tooltip-val">20</span></div>
+          <div class="tooltip-row"><span>GMV potencial</span><span class="tooltip-val">R$5.7M</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHICO -->
+    <div class="desk" style="left:840px;top:280px">
+      <div class="monitor">📈</div>
+      <div class="desk-body pending">
+        <div class="agent-status-dot"></div>
+        <div class="char">🧑‍🏫</div>
+        <div class="agent-name" style="color:#ed8936">CHICO</div>
+        <div class="tooltip">
+          <h4>📈 CHICO</h4>
+          <div class="tooltip-row"><span>Status</span><span class="tooltip-val">🕐 Agendado</span></div>
+          <div class="tooltip-row"><span>Próxima exec</span><span class="tooltip-val">Terça 02:00</span></div>
+          <div class="tooltip-row"><span>9 KPIs</span><span class="tooltip-val">por AM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative elements -->
+    <div style="position:absolute;left:1100px;top:60px;font-size:40px;opacity:0.15">🖥️</div>
+    <div style="position:absolute;left:1200px;top:200px;font-size:30px;opacity:0.1">📋</div>
+    <div style="position:absolute;left:580px;top:480px;font-size:30px;opacity:0.1">☕</div>
+    <div style="position:absolute;left:1050px;top:500px;font-size:40px;opacity:0.08">🌿</div>
+    <div style="position:absolute;left:200px;top:380px;font-size:30px;opacity:0.1">📁</div>
+
+  </div>
+</div>
+
+<div class="ticker">
+  <span class="ticker-label">⚡ LIVE</span>
+  <span class="ticker-content">
+    ✅ SEBASTIÃO concluiu coleta TAP+MCN — R$54.3M GMV &nbsp;&nbsp;|&nbsp;&nbsp;
+    ✅ GERALDO aprovou 35 amostras seguindo FAROL TAP &nbsp;&nbsp;|&nbsp;&nbsp;
+    ✅ OSVALDO extendeu 179 parcerias + 12 unlinks declinados &nbsp;&nbsp;|&nbsp;&nbsp;
+    ✅ HUGO identificou 20 oportunidades comerciais — R$5.7M potencial &nbsp;&nbsp;|&nbsp;&nbsp;
+    ⏳ JERÔNIMO aguardando TIAGO completar envios &nbsp;&nbsp;|&nbsp;&nbsp;
+    🕐 CHICO roda amanhã 02:00 — KPIs semanais por AM
+  </span>
+</div>
+
+</body>
+</html>
