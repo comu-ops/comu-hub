@@ -1,211 +1,187 @@
 {
-  "lastUpdated": "2026-03-25T13:30:21.672Z",
+  "lastUpdated": "2026-03-25T22:56:51.421Z",
   "summary": {
     "TAP GMV Total": {
-      "valor": "3294812.04",
-      "periodo": "2026-03-01 a 2026-03-16"
-    },
-    "TAP Video GMV": {
-      "valor": "1952263.83",
-      "periodo": "2026-03-01 a 2026-03-16"
-    },
-    "TAP LIVE GMV": {
-      "valor": "1322677.98",
-      "periodo": "2026-03-01 a 2026-03-16"
+      "valor": "5247195.1",
+      "periodo": "2026-02-22 → 2026-03-21"
     },
     "TAP Orders": {
-      "valor": "46978",
-      "periodo": "2026-03-01 a 2026-03-16"
+      "valor": "74203",
+      "periodo": "2026-02-22 → 2026-03-21"
     },
     "TAP Campanhas Ativas": {
-      "valor": "351",
-      "periodo": "2026-03-01 a 2026-03-16"
-    },
-    "TAP Creators Colaborados": {
-      "valor": "8646",
-      "periodo": "2026-03-01 a 2026-03-16"
-    },
-    "TAP Creators com Vendas": {
-      "valor": "948",
-      "periodo": "2026-03-01 a 2026-03-16"
+      "valor": "363",
+      "periodo": "2026-02-22 → 2026-03-21"
     },
     "MCN GMV Total": {
-      "valor": "34082497.24",
-      "periodo": "2026-03-01 a 2026-03-16"
-    },
-    "MCN Direct GMV": {
-      "valor": "28749978.24",
-      "periodo": "2026-03-01 a 2026-03-16"
+      "valor": "86368623.5",
+      "periodo": "2026-02-21 → 2026-03-20"
     },
     "MCN Items Sold": {
-      "valor": "672519",
-      "periodo": "2026-03-01 a 2026-03-16"
+      "valor": "1555834",
+      "periodo": "2026-02-21 → 2026-03-20"
     },
     "MCN Creators Únicos": {
-      "valor": "3902",
-      "periodo": "2026-03-01 a 2026-03-16"
-    },
-    "MCN Shops Únicos": {
-      "valor": "18466",
-      "periodo": "2026-03-01 a 2026-03-16"
+      "valor": "4484",
+      "periodo": "2026-02-21 → 2026-03-20"
     },
     "Última Atualização": {
-      "valor": "2026-03-19 12:49",
-      "periodo": "SEBASTIÃO"
+      "valor": "2026-03-22",
+      "periodo": "Hub Dashboard"
     }
   },
   "topCampanhas": [
     {
       "Campaign Name": "COMU x BARBOURS",
       "Campaign ID": "7551405337313773333",
-      "Affiliate GMV": "1009312.6",
-      "Affiliate Video GMV": "392104.4",
-      "Affiliate LIVE GMV": "613407.09",
-      "Orders": "15808",
-      "Products with sales": "39"
+      "Affiliate GMV": "1596626.38",
+      "Affiliate Video GMV": "611504.06",
+      "Affiliate LIVE GMV": "979404.85",
+      "Orders": "25631",
+      "Products with sales": "40"
     },
     {
       "Campaign Name": "COMU x GUMMY",
       "Campaign ID": "7565855438522713863",
-      "Affiliate GMV": "628198.3",
-      "Affiliate Video GMV": "246862.85",
-      "Affiliate LIVE GMV": "380210.4",
-      "Orders": "6466",
+      "Affiliate GMV": "1063321.05",
+      "Affiliate Video GMV": "358132.65",
+      "Affiliate LIVE GMV": "703769.84",
+      "Orders": "10724",
       "Products with sales": "14"
     },
     {
       "Campaign Name": "Creators ADEUS.",
       "Campaign ID": "7591861357177980690",
-      "Affiliate GMV": "229616.68",
-      "Affiliate Video GMV": "126534.54",
-      "Affiliate LIVE GMV": "94269.45",
-      "Orders": "1764",
+      "Affiliate GMV": "364949.52",
+      "Affiliate Video GMV": "200627.52",
+      "Affiliate LIVE GMV": "148172.95",
+      "Orders": "2715",
       "Products with sales": "8"
     },
     {
       "Campaign Name": "COMU x GOCASE*",
       "Campaign ID": "7594849801276573461",
-      "Affiliate GMV": "126314.09",
-      "Affiliate Video GMV": "74594.22",
-      "Affiliate LIVE GMV": "51359.37",
-      "Orders": "693",
+      "Affiliate GMV": "189617.60",
+      "Affiliate Video GMV": "103491.89",
+      "Affiliate LIVE GMV": "85765.21",
+      "Orders": "1050",
       "Products with sales": "7"
     },
     {
       "Campaign Name": "COMU x KOKESHI",
       "Campaign ID": "7551433225207449364",
-      "Affiliate GMV": "123779.02",
-      "Affiliate Video GMV": "117295.42",
-      "Affiliate LIVE GMV": "6153.6",
-      "Orders": "3189",
-      "Products with sales": "4"
-    },
-    {
-      "Campaign Name": "COMU x AURA",
-      "Campaign ID": "7515427459883190017",
-      "Affiliate GMV": "121117.53",
-      "Affiliate Video GMV": "99253.28",
-      "Affiliate LIVE GMV": "21462.34",
-      "Orders": "1505",
-      "Products with sales": "23"
-    },
-    {
-      "Campaign Name": "COMU x OI WHITE",
-      "Campaign ID": "7566603182513276680",
-      "Affiliate GMV": "91662.22",
-      "Affiliate Video GMV": "91175.05",
-      "Affiliate LIVE GMV": "394.56",
-      "Orders": "2806",
-      "Products with sales": "3"
-    },
-    {
-      "Campaign Name": "COMU x GUDAY",
-      "Campaign ID": "7520350147336210193",
-      "Affiliate GMV": "85954.22",
-      "Affiliate Video GMV": "83668.32",
-      "Affiliate LIVE GMV": "1589.91",
-      "Orders": "784",
-      "Products with sales": "9"
-    },
-    {
-      "Campaign Name": "A Agência nº1 do TikTok Shop Brasil",
-      "Campaign ID": "7571781831605012245",
-      "Affiliate GMV": "85362.16",
-      "Affiliate Video GMV": "84381.1",
-      "Affiliate LIVE GMV": "796.33",
-      "Orders": "493",
-      "Products with sales": "3"
+      "Affiliate GMV": "179635.77",
+      "Affiliate Video GMV": "169700.64",
+      "Affiliate LIVE GMV": "9501.75",
+      "Orders": "4622",
+      "Products with sales": "5"
     },
     {
       "Campaign Name": "COMU x L'OREAL",
       "Campaign ID": "7564048469684537106",
-      "Affiliate GMV": "84309.12",
-      "Affiliate Video GMV": "26597.17",
-      "Affiliate LIVE GMV": "57461.08",
-      "Orders": "1575",
+      "Affiliate GMV": "165952.52",
+      "Affiliate Video GMV": "40608.54",
+      "Affiliate LIVE GMV": "124946.53",
+      "Orders": "3025",
+      "Products with sales": "27"
+    },
+    {
+      "Campaign Name": "COMU x AURA",
+      "Campaign ID": "7515427459883190017",
+      "Affiliate GMV": "160023.07",
+      "Affiliate Video GMV": "133883.32",
+      "Affiliate LIVE GMV": "25277.78",
+      "Orders": "1912",
       "Products with sales": "25"
+    },
+    {
+      "Campaign Name": "COMU x OI WHITE",
+      "Campaign ID": "7566603182513276680",
+      "Affiliate GMV": "127196.32",
+      "Affiliate Video GMV": "126607.30",
+      "Affiliate LIVE GMV": "496.41",
+      "Orders": "3641",
+      "Products with sales": "3"
+    },
+    {
+      "Campaign Name": "A Agência nº1 do TikTok Shop Brasil",
+      "Campaign ID": "7571781831605012245",
+      "Affiliate GMV": "123339.96",
+      "Affiliate Video GMV": "118405.42",
+      "Affiliate LIVE GMV": "4749.81",
+      "Orders": "702",
+      "Products with sales": "4"
+    },
+    {
+      "Campaign Name": "COMU x GUDAY",
+      "Campaign ID": "7520350147336210193",
+      "Affiliate GMV": "120232.81",
+      "Affiliate Video GMV": "115955.34",
+      "Affiliate LIVE GMV": "3267.54",
+      "Orders": "1108",
+      "Products with sales": "11"
     }
   ],
   "topCreators": [
     {
       "Creator username": "felipe.tomio",
-      "Affiliate GMV": "873245.16",
-      "Items Sold": "14987",
-      "Videos": "1178"
+      "Affiliate GMV": "1297217.74",
+      "Items Sold": "20677",
+      "Videos": "20661"
     },
     {
       "Creator username": "laavsri",
-      "Affiliate GMV": "720255.03",
-      "Items Sold": "13916",
-      "Videos": "1307"
+      "Affiliate GMV": "1125323.84",
+      "Items Sold": "21051",
+      "Videos": "20889"
     },
     {
       "Creator username": "ericamcabeluda",
-      "Affiliate GMV": "628522.18",
-      "Items Sold": "11920",
-      "Videos": "2156"
+      "Affiliate GMV": "934762.22",
+      "Items Sold": "17251",
+      "Videos": "17248"
     },
     {
       "Creator username": "luisasoaress11",
-      "Affiliate GMV": "508183.96",
-      "Items Sold": "6370",
-      "Videos": "862"
-    },
-    {
-      "Creator username": "kevelybr",
-      "Affiliate GMV": "499657.31",
-      "Items Sold": "10680",
-      "Videos": "1631"
+      "Affiliate GMV": "853250.29",
+      "Items Sold": "10025",
+      "Videos": "9513"
     },
     {
       "Creator username": "paulorecomendaoficial",
-      "Affiliate GMV": "493238.06",
-      "Items Sold": "7050",
-      "Videos": "964"
+      "Affiliate GMV": "819236.41",
+      "Items Sold": "11179",
+      "Videos": "11169"
     },
     {
-      "Creator username": "cozinhadanayoficial",
-      "Affiliate GMV": "459843.65",
-      "Items Sold": "8426",
-      "Videos": "365"
+      "Creator username": "amandaxavieer",
+      "Affiliate GMV": "811687.59",
+      "Items Sold": "11983",
+      "Videos": "8109"
     },
     {
-      "Creator username": "ape_j.c",
-      "Affiliate GMV": "422485.51",
-      "Items Sold": "5354",
-      "Videos": "1573"
+      "Creator username": "kevelybr",
+      "Affiliate GMV": "764277.14",
+      "Items Sold": "15830",
+      "Videos": "15828"
+    },
+    {
+      "Creator username": "vitrineshopbyjaque",
+      "Affiliate GMV": "760647.45",
+      "Items Sold": "10928",
+      "Videos": "196"
+    },
+    {
+      "Creator username": "indicaaicasal",
+      "Affiliate GMV": "733554.10",
+      "Items Sold": "7220",
+      "Videos": "1185"
     },
     {
       "Creator username": "sougabrielaneves",
-      "Affiliate GMV": "413910.36",
-      "Items Sold": "5210",
-      "Videos": "839"
-    },
-    {
-      "Creator username": "laisstefanydaily",
-      "Affiliate GMV": "410974.86",
-      "Items Sold": "6415",
-      "Videos": "1466"
+      "Affiliate GMV": "681373.32",
+      "Items Sold": "8400",
+      "Videos": "8388"
     }
   ],
   "recentDocs": [
@@ -226,6 +202,12 @@
       "name": "CHICO — KPI Gabriella — Semana 16/03 a 22/03/2026",
       "date": "2026-03-25",
       "link": "https://docs.google.com/document/d/1XTRijPrnRgBRjcs-lJMo-dCWDsr2cl3NLJo6avLw11U/edit?usp=drivesdk"
+    },
+    {
+      "agent": "GERALDO",
+      "name": "2026-03-25-amostras-GERALDO-MASTER",
+      "date": "2026-03-25",
+      "link": "https://docs.google.com/document/d/1QyYo0NtFMLi6ML5wVNr-GtfaLiiqLg50BtMsNBsp1I4/edit?usp=drivesdk"
     },
     {
       "agent": "SEBASTIAO",
@@ -262,12 +244,6 @@
       "name": "2026",
       "date": "2026-03-23",
       "link": "https://drive.google.com/drive/folders/12nnnl0GiNJboetOFMCPfUJKHmqrxzOm7"
-    },
-    {
-      "agent": "OSVALDO",
-      "name": "2026",
-      "date": "2026-03-23",
-      "link": "https://drive.google.com/drive/folders/1q1KQAuxkwn0l6xOjvAwiYzfDGR_F9Byo"
     }
   ],
   "agents": {
