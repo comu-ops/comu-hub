@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-25T22:56:51.421Z",
+  "lastUpdated": "2026-03-26T11:00:09.671Z",
   "summary": {
     "TAP GMV Total": {
       "valor": "5247195.1",
@@ -186,6 +186,24 @@
   ],
   "recentDocs": [
     {
+      "agent": "GERALDO",
+      "name": "25/03/2026 | GERALDO — Aprovação de Amostras TAP",
+      "date": "2026-03-26",
+      "link": "https://docs.google.com/document/d/1-_zRMrMg9qVSjw1bjJRpZXh_JDOTEQG9NbL1WG40HHw/edit?usp=drivesdk"
+    },
+    {
+      "agent": "GERALDO",
+      "name": "25/03/2026 | GERALDO — Aprovação de Amostras TAP",
+      "date": "2026-03-26",
+      "link": "https://docs.google.com/document/d/1Cfuk-NW-aM-Krx_NwSgfTAwfGkz8fUXy2oQ9d65XQQE/edit?usp=drivesdk"
+    },
+    {
+      "agent": "GERALDO",
+      "name": "25/03/2026 | GERALDO — Aprovação de Amostras TAP",
+      "date": "2026-03-26",
+      "link": "https://docs.google.com/document/d/1ESrQYbJ0aIEr775hAwFoe_qGEkOCMOZGoGuyC_h3o3o/edit?usp=drivesdk"
+    },
+    {
       "agent": "CHICO",
       "name": "CHICO — KPI Kamila — Semana 16/03 a 22/03/2026",
       "date": "2026-03-25",
@@ -204,12 +222,6 @@
       "link": "https://docs.google.com/document/d/1XTRijPrnRgBRjcs-lJMo-dCWDsr2cl3NLJo6avLw11U/edit?usp=drivesdk"
     },
     {
-      "agent": "GERALDO",
-      "name": "2026-03-25-amostras-GERALDO-MASTER",
-      "date": "2026-03-25",
-      "link": "https://docs.google.com/document/d/1QyYo0NtFMLi6ML5wVNr-GtfaLiiqLg50BtMsNBsp1I4/edit?usp=drivesdk"
-    },
-    {
       "agent": "SEBASTIAO",
       "name": "2026-03-22-SEBASTIAO-teste",
       "date": "2026-03-23",
@@ -220,18 +232,6 @@
       "name": "2026",
       "date": "2026-03-23",
       "link": "https://drive.google.com/drive/folders/1aFPH-0QCz_-nklDtbExgkpGl1mGx6eRd"
-    },
-    {
-      "agent": "GERALDO",
-      "name": "2026-03-23-geraldo-report",
-      "date": "2026-03-23",
-      "link": "https://docs.google.com/document/d/1uw8-zTDZYH5lLzHT06yXS0yxL7eoA9wbrkg9F_uK1mI/edit?usp=drivesdk"
-    },
-    {
-      "agent": "GERALDO",
-      "name": "2026",
-      "date": "2026-03-23",
-      "link": "https://drive.google.com/drive/folders/16bqM_DN-OppAB0flw3b9Ckox7-BYvmBc"
     },
     {
       "agent": "HUGO",
