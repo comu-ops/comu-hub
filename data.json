@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-01T13:58:38.180Z",
+  "lastUpdated": "2026-05-03T22:35:09.547Z",
   "summary": {
     "TAP GMV Total": {
       "valor": "5247195.1",
@@ -186,6 +186,30 @@
   ],
   "recentDocs": [
     {
+      "agent": "CHICO",
+      "name": "2026-04-14-chico-kpi-carol-mello.docx",
+      "date": "2026-04-15",
+      "link": "https://docs.google.com/document/d/1RbpqChspf9a1dchA3HTiQ1_ffw-EudYw/edit?usp=drivesdk&ouid=103450018654371581468&rtpof=true&sd=true"
+    },
+    {
+      "agent": "CHICO",
+      "name": "2026-04-14-chico-kpi-aline.docx",
+      "date": "2026-04-15",
+      "link": "https://docs.google.com/document/d/1aL3lmlKeFJoRDJxHbValTKIccnGD4cw0/edit?usp=drivesdk&ouid=103450018654371581468&rtpof=true&sd=true"
+    },
+    {
+      "agent": "CHICO",
+      "name": "2026-04-14-chico-kpi-victoria.docx",
+      "date": "2026-04-14",
+      "link": "https://docs.google.com/document/d/18DJwPV5OxHlLFX6BmbxdUYWSHiKbbpiA/edit?usp=drivesdk&ouid=103450018654371581468&rtpof=true&sd=true"
+    },
+    {
+      "agent": "OSVALDO",
+      "name": "2026",
+      "date": "2026-04-09",
+      "link": "https://drive.google.com/drive/folders/1q1KQAuxkwn0l6xOjvAwiYzfDGR_F9Byo"
+    },
+    {
       "agent": "GERALDO",
       "name": "25/03/2026 | GERALDO — Aprovação de Amostras TAP",
       "date": "2026-03-26",
@@ -202,30 +226,6 @@
       "name": "25/03/2026 | GERALDO — Aprovação de Amostras TAP",
       "date": "2026-03-26",
       "link": "https://docs.google.com/document/d/1ESrQYbJ0aIEr775hAwFoe_qGEkOCMOZGoGuyC_h3o3o/edit?usp=drivesdk"
-    },
-    {
-      "agent": "CHICO",
-      "name": "CHICO — KPI Kamila — Semana 16/03 a 22/03/2026",
-      "date": "2026-03-25",
-      "link": "https://docs.google.com/document/d/1Jpi_xcxt0Alqjx3TPhiWeQhptmFLohJl0rWIKCx_goY/edit?usp=drivesdk"
-    },
-    {
-      "agent": "CHICO",
-      "name": "CHICO — KPI Fabi — Semana 16/03 a 22/03/2026",
-      "date": "2026-03-25",
-      "link": "https://docs.google.com/document/d/1kBa-8vFYat-twhpYOncuY05QFwqqESbNeYxFDO0GtxA/edit?usp=drivesdk"
-    },
-    {
-      "agent": "CHICO",
-      "name": "CHICO — KPI Gabriella — Semana 16/03 a 22/03/2026",
-      "date": "2026-03-25",
-      "link": "https://docs.google.com/document/d/1XTRijPrnRgBRjcs-lJMo-dCWDsr2cl3NLJo6avLw11U/edit?usp=drivesdk"
-    },
-    {
-      "agent": "SEBASTIAO",
-      "name": "2026-03-22-SEBASTIAO-teste",
-      "date": "2026-03-23",
-      "link": "https://docs.google.com/document/d/182hJPPXJTxR1Uz8w9mQ0TFTOXvOEnEeCAqwKWF5gUV0/edit?usp=drivesdk"
     },
     {
       "agent": "SEBASTIAO",
