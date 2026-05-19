@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-18T11:00:05.271Z",
+  "lastUpdated": "2026-05-19T11:00:05.592Z",
   "summary": {
     "TAP GMV Total": {
       "valor": "5247195.1",
@@ -249,7 +249,7 @@
   "agents": {
     "SEBASTIAO": {
       "status": "done",
-      "lastRun": "2026-05-17T13:30:05.498Z",
+      "lastRun": "2026-05-18T13:30:05.655Z",
       "model": "sonnet"
     },
     "JERONIMO": {
@@ -259,7 +259,7 @@
     },
     "OSVALDO": {
       "status": "done",
-      "lastRun": "2026-05-17T13:30:05.498Z",
+      "lastRun": "2026-05-18T13:30:05.655Z",
       "model": "opus"
     },
     "VALDIR": {
@@ -279,12 +279,12 @@
     },
     "GERALDO": {
       "status": "done",
-      "lastRun": "2026-05-17T13:30:05.498Z",
+      "lastRun": "2026-05-18T13:30:05.655Z",
       "model": "opus"
     },
     "HUGO": {
       "status": "done",
-      "lastRun": "2026-05-17T13:30:05.498Z",
+      "lastRun": "2026-05-18T13:30:05.655Z",
       "model": "gemini"
     },
     "CHICO": {
